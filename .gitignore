@@ -1,0 +1,27 @@
+# 忽略大型二进制文件和内部工具文件
+*.docx
+*.doc
+*.pdf
+*.exe
+*.dll
+*.pdb
+
+# ns-3 编译产物
+*.o
+*.obj
+*.so
+build/
+scratch/
+
+# Python 缓存
+__pycache__/
+*.pyc
+
+# 系统文件
+.vscode/
+.idea/
+Thumbs.db
+
+# 内部工具目录（不上传）
+.codegraph/
+.reasonix/
