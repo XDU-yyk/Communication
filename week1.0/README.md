@@ -8,7 +8,6 @@
 
 - **平台**：Ubuntu 虚拟机
 - **仿真器**：ns-3（内置 OLSR 模块 `src/olsr/`）
-- **⚠️ 不在 Windows 工作区运行仿真**
 
 ## 场景
 
@@ -20,24 +19,21 @@
 ## 运行步骤
 
 ```bash
-# 1. 复制脚本到 ns-3 scratch
-cp olsr-sim.cc ~/ns-allinone-3.43/ns-3.43/scratch/
+# 1. 将脚本复制到 ns-3 scratch（跟你之前的操作一样）
+cp ~/Desktop/olsr-sim.cc ~/repos/ns-3.43/scratch/
 
 # 2. 编译
 cd ~/ns-allinone-3.43/ns-3.43
-./ns3 configure --enable-examples --enable-tests
 ./ns3 build
 
-# 3. 运行 G0 静态基线
+# 3. 运行 G0 静态基线（30 机，300s）
 ./ns3 run "scratch/olsr-sim --scenario=static --nUavs=30 --simTime=300 --seed=1"
 
-# 4. 运行 G1 低速移动
+# 4. 运行 G1 低速移动（5-15 m/s 路点）
 ./ns3 run "scratch/olsr-sim --scenario=mobility --nUavs=30 --simTime=300 --seed=1"
 
-# 或使用一键脚本
-chmod +x run.sh
-./run.sh static 30 300 1
-./run.sh mobility 30 300 1
+# 先快速测试（60s 验证路由连通性）
+./ns3 run "scratch/olsr-sim --scenario=static --nUavs=30 --simTime=60 --seed=1"
 ```
 
 ## 参数说明

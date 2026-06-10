@@ -1,0 +1,11 @@
+Consolidate compiler generated dependencies of target scratch_olsr-sim
+Summary written to: results/olsr_summary.csv
+
+========== OLSR Results ==========
+  Total Tx Packets: 10
+  Total Rx Packets: 10
+  Overall PDR:      100%
+  Avg Delay:        10.5 ms
+  Total PHY TX:     1092364 bytes
+  Flow Count:       5
+================================

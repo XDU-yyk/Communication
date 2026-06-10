@@ -1,0 +1,146 @@
+[
+  {
+    "start": 462,
+    "end": 464,
+    "style": "Heading 2",
+    "title": "第5章 确定性通信与自组网子系统设计"
+  },
+  {
+    "start": 464,
+    "end": 475,
+    "style": "Heading 3",
+    "title": "5.1 通信需求分析"
+  },
+  {
+    "start": 475,
+    "end": 477,
+    "style": "Heading 3",
+    "title": "5.2 分层异构自组网架构"
+  },
+  {
+    "start": 477,
+    "end": 483,
+    "style": "Heading 4",
+    "title": "5.2.1 簇头选举与簇的建立"
+  },
+  {
+    "start": 483,
+    "end": 487,
+    "style": "Heading 4",
+    "title": "5.2.2  簇内星型通信"
+  },
+  {
+    "start": 487,
+    "end": 490,
+    "style": "Heading 4",
+    "title": "5.2.3簇间Mesh通信"
+  },
+  {
+    "start": 490,
+    "end": 493,
+    "style": "Heading 4",
+    "title": "5.2.4 地面基站与中继节点部署"
+  },
+  {
+    "start": 493,
+    "end": 495,
+    "style": "Heading 3",
+    "title": "5.3 控制链路设计"
+  },
+  {
+    "start": 495,
+    "end": 501,
+    "style": "Heading 4",
+    "title": "5.3.1 TDMA帧结构与时隙分配"
+  },
+  {
+    "start": 501,
+    "end": 504,
+    "style": "Heading 4",
+    "title": "5.3.2  时钟同步"
+  },
+  {
+    "start": 504,
+    "end": 509,
+    "style": "Heading 4",
+    "title": "5.3.3 指令优先级机制"
+  },
+  {
+    "start": 509,
+    "end": 512,
+    "style": "Heading 4",
+    "title": "5.3.4 50ms低时延保障"
+  },
+  {
+    "start": 512,
+    "end": 514,
+    "style": "Heading 3",
+    "title": "5.4 数据链路与图传链路设计"
+  },
+  {
+    "start": 514,
+    "end": 520,
+    "style": "Heading 4",
+    "title": "5.4.1  COFDM物理层设计"
+  },
+  {
+    "start": 520,
+    "end": 525,
+    "style": "Heading 4",
+    "title": "5.4.2 数据链路设计"
+  },
+  {
+    "start": 525,
+    "end": 528,
+    "style": "Heading 4",
+    "title": "5.4.3 图传链路设计"
+  },
+  {
+    "start": 528,
+    "end": 533,
+    "style": "Heading 4",
+    "title": "5.4.4  通信车道与QoS管理"
+  },
+  {
+    "start": 533,
+    "end": 535,
+    "style": "Heading 4",
+    "title": "5.4.5  控制链路与数据/图传链路隔离"
+  },
+  {
+    "start": 535,
+    "end": 537,
+    "style": "Heading 3",
+    "title": "5.5 通信可靠性与容错设计"
+  },
+  {
+    "start": 537,
+    "end": 540,
+    "style": "Heading 4",
+    "title": "5.5.1  链路质量监测"
+  },
+  {
+    "start": 540,
+    "end": 542,
+    "style": "Heading 4",
+    "title": "5.5.2  丢包重传与确认机制"
+  },
+  {
+    "start": 542,
+    "end": 545,
+    "style": "Heading 4",
+    "title": "5.5.3  节点掉线与簇头切换"
+  },
+  {
+    "start": 545,
+    "end": 548,
+    "style": "Heading 4",
+    "title": "5.5.4  通信异常时的安全策略"
+  },
+  {
+    "start": 548,
+    "end": 553,
+    "style": "Heading 4",
+    "title": "5.5.5  通信子系统实施步骤"
+  }
+]

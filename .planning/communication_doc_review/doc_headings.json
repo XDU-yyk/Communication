@@ -1,0 +1,1574 @@
+[
+  {
+    "block_no": 6,
+    "doc_idx": 25,
+    "style": "Heading 2",
+    "text": "摘要"
+  },
+  {
+    "block_no": 16,
+    "doc_idx": 36,
+    "style": "Heading 2",
+    "text": "第1章 绪论"
+  },
+  {
+    "block_no": 17,
+    "doc_idx": 37,
+    "style": "Heading 3",
+    "text": "1.1 研究背景与意义"
+  },
+  {
+    "block_no": 23,
+    "doc_idx": 43,
+    "style": "Heading 4",
+    "text": "1.1.1 应急救援场景对无人机系统的新需求"
+  },
+  {
+    "block_no": 29,
+    "doc_idx": 49,
+    "style": "Heading 4",
+    "text": "1.1.2 三断环境下无人机作业的核心瓶颈"
+  },
+  {
+    "block_no": 36,
+    "doc_idx": 56,
+    "style": "Heading 4",
+    "text": "1.1.3 多类型无人机协同安全控制的必要性"
+  },
+  {
+    "block_no": 42,
+    "doc_idx": 62,
+    "style": "Heading 3",
+    "text": "1.2 国内外研究现状"
+  },
+  {
+    "block_no": 46,
+    "doc_idx": 66,
+    "style": "Heading 4",
+    "text": "1.2.1 国内外区域发展情况调研"
+  },
+  {
+    "block_no": 54,
+    "doc_idx": 74,
+    "style": "Heading 2",
+    "text": "第2章 任务分析与设计输入"
+  },
+  {
+    "block_no": 57,
+    "doc_idx": 77,
+    "style": "Heading 3",
+    "text": "2.1 应用场景分析"
+  },
+  {
+    "block_no": 58,
+    "doc_idx": 78,
+    "style": "Heading 4",
+    "text": "2.1.1 城市密集高层建筑火场"
+  },
+  {
+    "block_no": 65,
+    "doc_idx": 85,
+    "style": "Heading 4",
+    "text": "2.1.2 地震地质灾害救援现场"
+  },
+  {
+    "block_no": 73,
+    "doc_idx": 93,
+    "style": "Heading 4",
+    "text": "2.1.3 断路、断网、断电极端环境"
+  },
+  {
+    "block_no": 81,
+    "doc_idx": 101,
+    "style": "Heading 4",
+    "text": "2.1.4 多部门异构无人机联合救援场景"
+  },
+  {
+    "block_no": 88,
+    "doc_idx": 108,
+    "style": "Heading 3",
+    "text": "2.2 用户指标要求分解"
+  },
+  {
+    "block_no": 91,
+    "doc_idx": 111,
+    "style": "Heading 4",
+    "text": "2.2.1 感知与避障指标"
+  },
+  {
+    "block_no": 101,
+    "doc_idx": 121,
+    "style": "Heading 4",
+    "text": "2.2.2 协同通信与调度指标"
+  },
+  {
+    "block_no": 111,
+    "doc_idx": 131,
+    "style": "Heading 4",
+    "text": "2.2.3 管控与部署指标"
+  },
+  {
+    "block_no": 121,
+    "doc_idx": 141,
+    "style": "Heading 4",
+    "text": "2.2.4 环境适应性指标"
+  },
+  {
+    "block_no": 129,
+    "doc_idx": 149,
+    "style": "Heading 3",
+    "text": "2.3 系统设计约束"
+  },
+  {
+    "block_no": 131,
+    "doc_idx": 151,
+    "style": "Heading 4",
+    "text": "2.3.1 作业范围约束"
+  },
+  {
+    "block_no": 141,
+    "doc_idx": 161,
+    "style": "Heading 4",
+    "text": "2.3.2 通信链路约束"
+  },
+  {
+    "block_no": 151,
+    "doc_idx": 171,
+    "style": "Heading 4",
+    "text": "2.3.3 平台重量与功耗约束"
+  },
+  {
+    "block_no": 162,
+    "doc_idx": 182,
+    "style": "Heading 4",
+    "text": "2.3.4 现场部署与人员操作约束"
+  },
+  {
+    "block_no": 172,
+    "doc_idx": 192,
+    "style": "Heading 3",
+    "text": "2.4 总体技术指标表"
+  },
+  {
+    "block_no": 178,
+    "doc_idx": 198,
+    "style": "Heading 4",
+    "text": "1.2.2 国内外主要公司及产品调研"
+  },
+  {
+    "block_no": 188,
+    "doc_idx": 209,
+    "style": "Heading 4",
+    "text": "1.2.3 国内外无人机感知与避障技术现状"
+  },
+  {
+    "block_no": 197,
+    "doc_idx": 218,
+    "style": "Heading 4",
+    "text": "1.2.4 国内外多无人机协同调度技术现状"
+  },
+  {
+    "block_no": 208,
+    "doc_idx": 229,
+    "style": "Heading 4",
+    "text": "1.2.5 国内外应急无人机通信与通导监技术现状"
+  },
+  {
+    "block_no": 220,
+    "doc_idx": 241,
+    "style": "Heading 4",
+    "text": "1.2.6 异构无人机统一控制技术现状"
+  },
+  {
+    "block_no": 232,
+    "doc_idx": 253,
+    "style": "Heading 2",
+    "text": "系统架构与方案选择"
+  },
+  {
+    "block_no": 234,
+    "doc_idx": 255,
+    "style": "Heading 3",
+    "text": "3.1 系统组成与工作原理"
+  },
+  {
+    "block_no": 240,
+    "doc_idx": 261,
+    "style": "Heading 4",
+    "text": "3.1.1物理部署架构"
+  },
+  {
+    "block_no": 248,
+    "doc_idx": 269,
+    "style": "Heading 4",
+    "text": "3.1.2软件基础层"
+  },
+  {
+    "block_no": 254,
+    "doc_idx": 275,
+    "style": "Heading 4",
+    "text": "3.1.3一底座、一总线、三中心架构"
+  },
+  {
+    "block_no": 261,
+    "doc_idx": 282,
+    "style": "Heading 4",
+    "text": "3.1.4系统工作流程"
+  },
+  {
+    "block_no": 270,
+    "doc_idx": 291,
+    "style": "Heading 3",
+    "text": "3.2 研究方法论"
+  },
+  {
+    "block_no": 272,
+    "doc_idx": 293,
+    "style": "Heading 4",
+    "text": "3.2.1 软件定义安全"
+  },
+  {
+    "block_no": 275,
+    "doc_idx": 296,
+    "style": "Heading 4",
+    "text": "3.2.2 分布式协同"
+  },
+  {
+    "block_no": 277,
+    "doc_idx": 298,
+    "style": "Heading 4",
+    "text": "3.2.3 确定性通信"
+  },
+  {
+    "block_no": 279,
+    "doc_idx": 300,
+    "style": "Heading 4",
+    "text": "3.2.4 标准化适配"
+  },
+  {
+    "block_no": 281,
+    "doc_idx": 302,
+    "style": "Heading 3",
+    "text": "3.3 技术路线对比与选择"
+  },
+  {
+    "block_no": 283,
+    "doc_idx": 304,
+    "style": "Heading 4",
+    "text": "3.3.1 感知方案对比"
+  },
+  {
+    "block_no": 290,
+    "doc_idx": 311,
+    "style": "Heading 4",
+    "text": "3.3.2 通信方案对比"
+  },
+  {
+    "block_no": 298,
+    "doc_idx": 319,
+    "style": "Heading 4",
+    "text": "3.3.3 调度方案对比"
+  },
+  {
+    "block_no": 306,
+    "doc_idx": 327,
+    "style": "Heading 4",
+    "text": "3.3.4 异构接入方案对比"
+  },
+  {
+    "block_no": 314,
+    "doc_idx": 335,
+    "style": "Heading 3",
+    "text": "3.4 系统总体架构"
+  },
+  {
+    "block_no": 322,
+    "doc_idx": 344,
+    "style": "Heading 3",
+    "text": "3.5 工作模式定义"
+  },
+  {
+    "block_no": 326,
+    "doc_idx": 348,
+    "style": "Heading 4",
+    "text": "3.5.1 单机安全避障模式"
+  },
+  {
+    "block_no": 330,
+    "doc_idx": 352,
+    "style": "Heading 4",
+    "text": "3.5.2 多机协同调度模式"
+  },
+  {
+    "block_no": 334,
+    "doc_idx": 357,
+    "style": "Heading 4",
+    "text": "3.5.3 三断应急运行模式"
+  },
+  {
+    "block_no": 339,
+    "doc_idx": 362,
+    "style": "Heading 4",
+    "text": "3.5.4 异构无人机快速接入模式"
+  },
+  {
+    "block_no": 343,
+    "doc_idx": 366,
+    "style": "Heading 4",
+    "text": "3.5.5 综合演练与复盘模式"
+  },
+  {
+    "block_no": 348,
+    "doc_idx": 371,
+    "style": "Heading 3",
+    "text": "3.6 关键技术参数汇总"
+  },
+  {
+    "block_no": 354,
+    "doc_idx": 379,
+    "style": "Heading 2",
+    "text": "第4章 机载感知与避障子系统设计"
+  },
+  {
+    "block_no": 356,
+    "doc_idx": 381,
+    "style": "Heading 3",
+    "text": "4.1 机载感知设备设计"
+  },
+  {
+    "block_no": 358,
+    "doc_idx": 383,
+    "style": "Heading 4",
+    "text": "4.1.1 传感器选型与配置"
+  },
+  {
+    "block_no": 367,
+    "doc_idx": 392,
+    "style": "Heading 4",
+    "text": "4.1.2  传感器硬件抽象层（HDF/HDI）"
+  },
+  {
+    "block_no": 374,
+    "doc_idx": 399,
+    "style": "Heading 4",
+    "text": "4.1.3 多源感知数据融合流水线"
+  },
+  {
+    "block_no": 381,
+    "doc_idx": 407,
+    "style": "Heading 4",
+    "text": "4.1.4 低能见度条件下的感知适应"
+  },
+  {
+    "block_no": 387,
+    "doc_idx": 413,
+    "style": "Heading 4",
+    "text": "4.1.5 强磁环境下的无磁融合导航"
+  },
+  {
+    "block_no": 391,
+    "doc_idx": 417,
+    "style": "Heading 3",
+    "text": "4.2 障碍物识别与动态目标追踪设计"
+  },
+  {
+    "block_no": 393,
+    "doc_idx": 419,
+    "style": "Heading 4",
+    "text": "4.2.1 静态障碍物识别"
+  },
+  {
+    "block_no": 398,
+    "doc_idx": 424,
+    "style": "Heading 4",
+    "text": "4.2.2 动态目标追踪"
+  },
+  {
+    "block_no": 406,
+    "doc_idx": 432,
+    "style": "Heading 4",
+    "text": "4.2.3 轨迹预测"
+  },
+  {
+    "block_no": 410,
+    "doc_idx": 436,
+    "style": "Heading 3",
+    "text": "4.3 实时避障控制设计"
+  },
+  {
+    "block_no": 412,
+    "doc_idx": 438,
+    "style": "Heading 4",
+    "text": "4.3.1 预测性安全走廊生成"
+  },
+  {
+    "block_no": 416,
+    "doc_idx": 442,
+    "style": "Heading 4",
+    "text": "4.3.2 快速避障响应时间预算"
+  },
+  {
+    "block_no": 427,
+    "doc_idx": 453,
+    "style": "Heading 4",
+    "text": "4.3.3 基于LiteOS-M的飞控优先级保障"
+  },
+  {
+    "block_no": 431,
+    "doc_idx": 457,
+    "style": "Heading 4",
+    "text": "4.3.4 执行机构响应优化"
+  },
+  {
+    "block_no": 439,
+    "doc_idx": 466,
+    "style": "Heading 3",
+    "text": "4.4 避障系统可靠性设计"
+  },
+  {
+    "block_no": 441,
+    "doc_idx": 468,
+    "style": "Heading 4",
+    "text": "4.4.1  传感器故障检测与降级运行"
+  },
+  {
+    "block_no": 449,
+    "doc_idx": 476,
+    "style": "Heading 4",
+    "text": "4.4.2  看门狗与健康监测"
+  },
+  {
+    "block_no": 453,
+    "doc_idx": 480,
+    "style": "Heading 4",
+    "text": "4.4.3  安全过滤层与误报/漏报控制"
+  },
+  {
+    "block_no": 457,
+    "doc_idx": 484,
+    "style": "Heading 4",
+    "text": "4.4.4  连续无故障运行≥300h的设计保障"
+  },
+  {
+    "block_no": 462,
+    "doc_idx": 490,
+    "style": "Heading 2",
+    "text": "第5章 确定性通信与自组网子系统设计"
+  },
+  {
+    "block_no": 464,
+    "doc_idx": 492,
+    "style": "Heading 3",
+    "text": "5.1 通信需求分析"
+  },
+  {
+    "block_no": 475,
+    "doc_idx": 503,
+    "style": "Heading 3",
+    "text": "5.2 分层异构自组网架构"
+  },
+  {
+    "block_no": 477,
+    "doc_idx": 505,
+    "style": "Heading 4",
+    "text": "5.2.1 簇头选举与簇的建立"
+  },
+  {
+    "block_no": 483,
+    "doc_idx": 512,
+    "style": "Heading 4",
+    "text": "5.2.2  簇内星型通信"
+  },
+  {
+    "block_no": 487,
+    "doc_idx": 517,
+    "style": "Heading 4",
+    "text": "5.2.3簇间Mesh通信"
+  },
+  {
+    "block_no": 490,
+    "doc_idx": 520,
+    "style": "Heading 4",
+    "text": "5.2.4 地面基站与中继节点部署"
+  },
+  {
+    "block_no": 493,
+    "doc_idx": 523,
+    "style": "Heading 3",
+    "text": "5.3 控制链路设计"
+  },
+  {
+    "block_no": 495,
+    "doc_idx": 525,
+    "style": "Heading 4",
+    "text": "5.3.1 TDMA帧结构与时隙分配"
+  },
+  {
+    "block_no": 501,
+    "doc_idx": 531,
+    "style": "Heading 4",
+    "text": "5.3.2  时钟同步"
+  },
+  {
+    "block_no": 504,
+    "doc_idx": 534,
+    "style": "Heading 4",
+    "text": "5.3.3 指令优先级机制"
+  },
+  {
+    "block_no": 509,
+    "doc_idx": 539,
+    "style": "Heading 4",
+    "text": "5.3.4 50ms低时延保障"
+  },
+  {
+    "block_no": 512,
+    "doc_idx": 542,
+    "style": "Heading 3",
+    "text": "5.4 数据链路与图传链路设计"
+  },
+  {
+    "block_no": 514,
+    "doc_idx": 544,
+    "style": "Heading 4",
+    "text": "5.4.1  COFDM物理层设计"
+  },
+  {
+    "block_no": 520,
+    "doc_idx": 550,
+    "style": "Heading 4",
+    "text": "5.4.2 数据链路设计"
+  },
+  {
+    "block_no": 525,
+    "doc_idx": 555,
+    "style": "Heading 4",
+    "text": "5.4.3 图传链路设计"
+  },
+  {
+    "block_no": 528,
+    "doc_idx": 558,
+    "style": "Heading 4",
+    "text": "5.4.4  通信车道与QoS管理"
+  },
+  {
+    "block_no": 533,
+    "doc_idx": 563,
+    "style": "Heading 4",
+    "text": "5.4.5  控制链路与数据/图传链路隔离"
+  },
+  {
+    "block_no": 535,
+    "doc_idx": 565,
+    "style": "Heading 3",
+    "text": "5.5 通信可靠性与容错设计"
+  },
+  {
+    "block_no": 537,
+    "doc_idx": 567,
+    "style": "Heading 4",
+    "text": "5.5.1  链路质量监测"
+  },
+  {
+    "block_no": 540,
+    "doc_idx": 570,
+    "style": "Heading 4",
+    "text": "5.5.2  丢包重传与确认机制"
+  },
+  {
+    "block_no": 542,
+    "doc_idx": 572,
+    "style": "Heading 4",
+    "text": "5.5.3  节点掉线与簇头切换"
+  },
+  {
+    "block_no": 545,
+    "doc_idx": 575,
+    "style": "Heading 4",
+    "text": "5.5.4  通信异常时的安全策略"
+  },
+  {
+    "block_no": 548,
+    "doc_idx": 578,
+    "style": "Heading 4",
+    "text": "5.5.5  通信子系统实施步骤"
+  },
+  {
+    "block_no": 553,
+    "doc_idx": 583,
+    "style": "Heading 2",
+    "text": "第6章 多机协同调度与空域管理设计"
+  },
+  {
+    "block_no": 555,
+    "doc_idx": 585,
+    "style": "Heading 3",
+    "text": "6.1 集中式协同控制总体框架"
+  },
+  {
+    "block_no": 564,
+    "doc_idx": 595,
+    "style": "Heading 3",
+    "text": "6.2  4D时空占用栅格模型"
+  },
+  {
+    "block_no": 573,
+    "doc_idx": 604,
+    "style": "Heading 3",
+    "text": "6.3 多机轨迹预测"
+  },
+  {
+    "block_no": 575,
+    "doc_idx": 606,
+    "style": "Heading 4",
+    "text": "6.3.1  分层预测策略"
+  },
+  {
+    "block_no": 579,
+    "doc_idx": 610,
+    "style": "Heading 4",
+    "text": "6.3.2  预测不确定度建模"
+  },
+  {
+    "block_no": 582,
+    "doc_idx": 613,
+    "style": "Heading 4",
+    "text": "6.3.3  预测一致性与交互约束"
+  },
+  {
+    "block_no": 585,
+    "doc_idx": 616,
+    "style": "Heading 3",
+    "text": "6.4 冲突检测机制"
+  },
+  {
+    "block_no": 587,
+    "doc_idx": 618,
+    "style": "Heading 4",
+    "text": "6.4.1  两两冲突检测"
+  },
+  {
+    "block_no": 590,
+    "doc_idx": 621,
+    "style": "Heading 4",
+    "text": "6.4.2  空域约束冲突检测"
+  },
+  {
+    "block_no": 593,
+    "doc_idx": 624,
+    "style": "Heading 4",
+    "text": "6.4.3  冲突等级划分"
+  },
+  {
+    "block_no": 597,
+    "doc_idx": 628,
+    "style": "Heading 3",
+    "text": "6.5 冲突消解与任务重规划"
+  },
+  {
+    "block_no": 599,
+    "doc_idx": 630,
+    "style": "Heading 4",
+    "text": "6.5.1  消解原语与选择策略"
+  },
+  {
+    "block_no": 603,
+    "doc_idx": 634,
+    "style": "Heading 4",
+    "text": "6.5.2  集中式消解计算流程"
+  },
+  {
+    "block_no": 608,
+    "doc_idx": 639,
+    "style": "Heading 4",
+    "text": "6.5.3  边缘自治消解"
+  },
+  {
+    "block_no": 613,
+    "doc_idx": 644,
+    "style": "Heading 4",
+    "text": "6.5.4  任务重规划"
+  },
+  {
+    "block_no": 616,
+    "doc_idx": 647,
+    "style": "Heading 4",
+    "text": "6.5.5  任务分配机制"
+  },
+  {
+    "block_no": 620,
+    "doc_idx": 651,
+    "style": "Heading 3",
+    "text": "6.6 空域动态划分设计"
+  },
+  {
+    "block_no": 628,
+    "doc_idx": 659,
+    "style": "Heading 3",
+    "text": "6.7 无碰撞调度成功率保障方法"
+  },
+  {
+    "block_no": 638,
+    "doc_idx": 669,
+    "style": "Heading 3",
+    "text": "6.8  集中协同运动控制实施步骤"
+  },
+  {
+    "block_no": 646,
+    "doc_idx": 678,
+    "style": "Heading 2",
+    "text": "第7章 异构无人机快速注册与统一管理设计"
+  },
+  {
+    "block_no": 648,
+    "doc_idx": 680,
+    "style": "Heading 3",
+    "text": "7.1 异构无人机接入需求"
+  },
+  {
+    "block_no": 653,
+    "doc_idx": 685,
+    "style": "Heading 3",
+    "text": "7.2 协议指纹识别机制"
+  },
+  {
+    "block_no": 655,
+    "doc_idx": 687,
+    "style": "Heading 4",
+    "text": "7.2.1  指纹采集与特征提取"
+  },
+  {
+    "block_no": 660,
+    "doc_idx": 692,
+    "style": "Heading 4",
+    "text": "7.2.2  协议模板匹配"
+  },
+  {
+    "block_no": 666,
+    "doc_idx": 698,
+    "style": "Heading 4",
+    "text": "7.2.3  分布式软总线的设备发现协同"
+  },
+  {
+    "block_no": 675,
+    "doc_idx": 708,
+    "style": "Heading 3",
+    "text": "7.3 开放协议适配设计"
+  },
+  {
+    "block_no": 677,
+    "doc_idx": 710,
+    "style": "Heading 4",
+    "text": "7.3.1  MAVLink协议栈适配"
+  },
+  {
+    "block_no": 681,
+    "doc_idx": 714,
+    "style": "Heading 4",
+    "text": "7.3.2  开放协议快速注册流程"
+  },
+  {
+    "block_no": 684,
+    "doc_idx": 717,
+    "style": "Heading 3",
+    "text": "7.4 封闭协议预置适配设计"
+  },
+  {
+    "block_no": 686,
+    "doc_idx": 719,
+    "style": "Heading 4",
+    "text": "7.4.1  预置适配模块开发方法"
+  },
+  {
+    "block_no": 689,
+    "doc_idx": 722,
+    "style": "Heading 4",
+    "text": "7.4.2  适配层架构与设备抽象"
+  },
+  {
+    "block_no": 694,
+    "doc_idx": 727,
+    "style": "Heading 3",
+    "text": "7.5 统一设备状态管理"
+  },
+  {
+    "block_no": 696,
+    "doc_idx": 729,
+    "style": "Heading 4",
+    "text": "7.5.1  统一设备信息模型"
+  },
+  {
+    "block_no": 702,
+    "doc_idx": 735,
+    "style": "Heading 4",
+    "text": "7.5.2  设备生命周期状态机"
+  },
+  {
+    "block_no": 706,
+    "doc_idx": 740,
+    "style": "Heading 3",
+    "text": "7.6 任务下发与控制接口设计"
+  },
+  {
+    "block_no": 708,
+    "doc_idx": 742,
+    "style": "Heading 4",
+    "text": "7.6.1  统一控制接口定义"
+  },
+  {
+    "block_no": 711,
+    "doc_idx": 745,
+    "style": "Heading 4",
+    "text": "7.6.2  指令优先级与并发控制"
+  },
+  {
+    "block_no": 716,
+    "doc_idx": 750,
+    "style": "Heading 4",
+    "text": "7.6.3  协议翻译层的错误处理"
+  },
+  {
+    "block_no": 719,
+    "doc_idx": 753,
+    "style": "Heading 3",
+    "text": "7.7  多类型航空器统一管控流程"
+  },
+  {
+    "block_no": 721,
+    "doc_idx": 755,
+    "style": "Heading 4",
+    "text": "7.7.1  接入与注册阶段"
+  },
+  {
+    "block_no": 723,
+    "doc_idx": 757,
+    "style": "Heading 4",
+    "text": "7.7.2  能力评估与任务匹配阶段"
+  },
+  {
+    "block_no": 725,
+    "doc_idx": 759,
+    "style": "Heading 4",
+    "text": "7.7.3  任务执行与状态监控阶段"
+  },
+  {
+    "block_no": 728,
+    "doc_idx": 762,
+    "style": "Heading 4",
+    "text": "7.7.4  离网与回收阶段"
+  },
+  {
+    "block_no": 731,
+    "doc_idx": 766,
+    "style": "Heading 4",
+    "text": "7.7.5  异构无人机快速注册与统一管理实施步骤"
+  },
+  {
+    "block_no": 738,
+    "doc_idx": 777,
+    "style": "Heading 2",
+    "text": "第8章 便携式智慧空管平台设计"
+  },
+  {
+    "block_no": 741,
+    "doc_idx": 780,
+    "style": "Heading 3",
+    "text": "8.1 平台总体组成"
+  },
+  {
+    "block_no": 753,
+    "doc_idx": 793,
+    "style": "Heading 3",
+    "text": "8.2 硬件组成设计"
+  },
+  {
+    "block_no": 755,
+    "doc_idx": 795,
+    "style": "Heading 4",
+    "text": "8.2.1 计算单元"
+  },
+  {
+    "block_no": 763,
+    "doc_idx": 803,
+    "style": "Heading 4",
+    "text": "8.2.2 通信基站"
+  },
+  {
+    "block_no": 770,
+    "doc_idx": 810,
+    "style": "Heading 4",
+    "text": "8.2.3 显示交互终端"
+  },
+  {
+    "block_no": 775,
+    "doc_idx": 815,
+    "style": "Heading 4",
+    "text": "8.2.4 三防箱组与结构设计"
+  },
+  {
+    "block_no": 783,
+    "doc_idx": 824,
+    "style": "Heading 3",
+    "text": "8.3 软件功能设计"
+  },
+  {
+    "block_no": 785,
+    "doc_idx": 826,
+    "style": "Heading 4",
+    "text": "8.3.1 数字孪生态势中心"
+  },
+  {
+    "block_no": 793,
+    "doc_idx": 835,
+    "style": "Heading 4",
+    "text": "8.3.2  鸿蒙分布式渲染卸载"
+  },
+  {
+    "block_no": 798,
+    "doc_idx": 840,
+    "style": "Heading 4",
+    "text": "8.3.3 协议指纹识别中心"
+  },
+  {
+    "block_no": 802,
+    "doc_idx": 844,
+    "style": "Heading 4",
+    "text": "8.3.4 电源管理与持续保障中心"
+  },
+  {
+    "block_no": 809,
+    "doc_idx": 851,
+    "style": "Heading 4",
+    "text": "8.3.5 任务规划与机群管理"
+  },
+  {
+    "block_no": 814,
+    "doc_idx": 856,
+    "style": "Heading 4",
+    "text": "8.3.6 数据记录与回放"
+  },
+  {
+    "block_no": 821,
+    "doc_idx": 865,
+    "style": "Heading 3",
+    "text": "8.4 重量、功耗与部署设计"
+  },
+  {
+    "block_no": 830,
+    "doc_idx": 875,
+    "style": "Heading 2",
+    "text": "第9章 能源保障与环境适应性设计"
+  },
+  {
+    "block_no": 832,
+    "doc_idx": 877,
+    "style": "Heading 3",
+    "text": "9.1 三断环境运行需求分析"
+  },
+  {
+    "block_no": 838,
+    "doc_idx": 883,
+    "style": "Heading 3",
+    "text": "9.2 能源系统设计"
+  },
+  {
+    "block_no": 840,
+    "doc_idx": 885,
+    "style": "Heading 4",
+    "text": "9.2.1 内置电池"
+  },
+  {
+    "block_no": 844,
+    "doc_idx": 889,
+    "style": "Heading 4",
+    "text": "9.2.2 外部热插拔能源模块"
+  },
+  {
+    "block_no": 851,
+    "doc_idx": 896,
+    "style": "Heading 4",
+    "text": "9.2.3 车辆电源/便携发电机接入"
+  },
+  {
+    "block_no": 855,
+    "doc_idx": 900,
+    "style": "Heading 4",
+    "text": "9.2.4 超级电容缓冲"
+  },
+  {
+    "block_no": 862,
+    "doc_idx": 908,
+    "style": "Heading 4",
+    "text": "9.2.5  鸿蒙电源管理软件机制"
+  },
+  {
+    "block_no": 868,
+    "doc_idx": 914,
+    "style": "Heading 3",
+    "text": "9.3 120h连续运行保障"
+  },
+  {
+    "block_no": 873,
+    "doc_idx": 919,
+    "style": "Heading 3",
+    "text": "9.4 高低温环境适应设计"
+  },
+  {
+    "block_no": 878,
+    "doc_idx": 924,
+    "style": "Heading 3",
+    "text": "9.5 强磁干扰环境适应设计"
+  },
+  {
+    "block_no": 884,
+    "doc_idx": 933,
+    "style": "Heading 2",
+    "text": "第10章 软件系统与代码原型设计"
+  },
+  {
+    "block_no": 886,
+    "doc_idx": 935,
+    "style": "Heading 3",
+    "text": "10.1 软件总体架构"
+  },
+  {
+    "block_no": 897,
+    "doc_idx": 948,
+    "style": "Heading 4",
+    "text": "10.1.1  鸿蒙软件底座总体定位"
+  },
+  {
+    "block_no": 900,
+    "doc_idx": 951,
+    "style": "Heading 4",
+    "text": "10.1.2  LiteOS-M实时内核配置"
+  },
+  {
+    "block_no": 906,
+    "doc_idx": 957,
+    "style": "Heading 4",
+    "text": "10.1.3  HDF/HDI硬件抽象接口规范"
+  },
+  {
+    "block_no": 911,
+    "doc_idx": 962,
+    "style": "Heading 4",
+    "text": "10.1.4  分布式软总线数据流"
+  },
+  {
+    "block_no": 916,
+    "doc_idx": 967,
+    "style": "Heading 4",
+    "text": "10.1.5  鸿蒙电源管理集成"
+  },
+  {
+    "block_no": 922,
+    "doc_idx": 973,
+    "style": "Heading 3",
+    "text": "10.2 核心数据模型"
+  },
+  {
+    "block_no": 924,
+    "doc_idx": 975,
+    "style": "Heading 4",
+    "text": "10.2.1  无人机状态模型（DroneState）"
+  },
+  {
+    "block_no": 927,
+    "doc_idx": 978,
+    "style": "Heading 4",
+    "text": "10.2.2  无人机指令模型（DroneCommand）"
+  },
+  {
+    "block_no": 930,
+    "doc_idx": 981,
+    "style": "Heading 4",
+    "text": "10.2.3  无人机能力模型（DroneCapability）"
+  },
+  {
+    "block_no": 933,
+    "doc_idx": 984,
+    "style": "Heading 4",
+    "text": "10.2.4  感知消息模型（PerceptionMsg）"
+  },
+  {
+    "block_no": 936,
+    "doc_idx": 987,
+    "style": "Heading 4",
+    "text": "10.2.5  心跳与链路状态模型（HeartbeatMsg）"
+  },
+  {
+    "block_no": 940,
+    "doc_idx": 991,
+    "style": "Heading 3",
+    "text": "10.3 原型系统初步开发范围"
+  },
+  {
+    "block_no": 942,
+    "doc_idx": 993,
+    "style": "Heading 4",
+    "text": "10.3.1  通信链路原型（C++核心代码）"
+  },
+  {
+    "block_no": 954,
+    "doc_idx": 1005,
+    "style": "Heading 4",
+    "text": "10.3.2  集中协同运动控制原型（C++核心代码）"
+  },
+  {
+    "block_no": 966,
+    "doc_idx": 1017,
+    "style": "Heading 4",
+    "text": "10.3.3  异构接入网关原型（C++核心代码）"
+  },
+  {
+    "block_no": 978,
+    "doc_idx": 1029,
+    "style": "Heading 3",
+    "text": "10.4 算法原型代码交付范围"
+  },
+  {
+    "block_no": 988,
+    "doc_idx": 1039,
+    "style": "Heading 4",
+    "text": "10.4.1  obstacle_fusion_demo.py — 多源障碍物融合识别"
+  },
+  {
+    "block_no": 991,
+    "doc_idx": 1042,
+    "style": "Heading 4",
+    "text": "10.4.2  conflict_detection_4d.py — 4D时空轨迹冲突检测"
+  },
+  {
+    "block_no": 994,
+    "doc_idx": 1045,
+    "style": "Heading 4",
+    "text": "10.4.3  drone_registry_gateway.py — 异构无人机注册与协议识别"
+  },
+  {
+    "block_no": 997,
+    "doc_idx": 1048,
+    "style": "Heading 4",
+    "text": "10.4.4  tdma_scheduler_demo.py — TDMA时隙分配与延迟估算"
+  },
+  {
+    "block_no": 1000,
+    "doc_idx": 1051,
+    "style": "Heading 4",
+    "text": "10.4.5  airspace_replan_demo.py — 动态空域划分与航线重规划"
+  },
+  {
+    "block_no": 1004,
+    "doc_idx": 1056,
+    "style": "Heading 3",
+    "text": "10.5 代码功能说明"
+  },
+  {
+    "block_no": 1014,
+    "doc_idx": 1067,
+    "style": "Heading 3",
+    "text": "10.6  代码运行示例"
+  },
+  {
+    "block_no": 1019,
+    "doc_idx": 1072,
+    "style": "Heading 3",
+    "text": "10.7  原型系统实施步骤"
+  },
+  {
+    "block_no": 1027,
+    "doc_idx": 1080,
+    "style": "Heading 3",
+    "text": "10.8 后续工程化开发计划"
+  },
+  {
+    "block_no": 1033,
+    "doc_idx": 1091,
+    "style": "Heading 2",
+    "text": "第11章 算法原型仿真与半实物验证设计"
+  },
+  {
+    "block_no": 1035,
+    "doc_idx": 1093,
+    "style": "Heading 3",
+    "text": "11.1 验证总体思路"
+  },
+  {
+    "block_no": 1042,
+    "doc_idx": 1100,
+    "style": "Heading 3",
+    "text": "11.2 轻量算法仿真"
+  },
+  {
+    "block_no": 1044,
+    "doc_idx": 1102,
+    "style": "Heading 4",
+    "text": "11.2.1  4D时空冲突检测仿真"
+  },
+  {
+    "block_no": 1047,
+    "doc_idx": 1105,
+    "style": "Heading 4",
+    "text": "11.2.2  TDMA时隙分配仿真"
+  },
+  {
+    "block_no": 1050,
+    "doc_idx": 1108,
+    "style": "Heading 4",
+    "text": "11.2.3  动态空域重规划仿真"
+  },
+  {
+    "block_no": 1053,
+    "doc_idx": 1111,
+    "style": "Heading 4",
+    "text": "11.2.4  仿真场景定义与覆盖范围"
+  },
+  {
+    "block_no": 1057,
+    "doc_idx": 1115,
+    "style": "Heading 4",
+    "text": "11.2.5  节点掉线容错与多机调度成功率仿真"
+  },
+  {
+    "block_no": 1060,
+    "doc_idx": 1118,
+    "style": "Heading 3",
+    "text": "11.3 开源半实物仿真"
+  },
+  {
+    "block_no": 1062,
+    "doc_idx": 1120,
+    "style": "Heading 4",
+    "text": "11.3.1  PX4 SITL + Gazebo闭环仿真"
+  },
+  {
+    "block_no": 1066,
+    "doc_idx": 1124,
+    "style": "Heading 4",
+    "text": "11.3.2  通信链路半实物仿真"
+  },
+  {
+    "block_no": 1068,
+    "doc_idx": 1126,
+    "style": "Heading 4",
+    "text": "11.3.3  半实物仿真测试用例"
+  },
+  {
+    "block_no": 1073,
+    "doc_idx": 1131,
+    "style": "Heading 3",
+    "text": "11.4 外场实测验证接口"
+  },
+  {
+    "block_no": 1074,
+    "doc_idx": 1132,
+    "style": "Normal",
+    "text": "第11章不重复写外场实测的具体方法（这些在第12章详细展开），但需要在此明确半实物仿真到外场实测的过渡接口-仿真中验证通过的算法和配置如何迁移到真实飞行环境中。"
+  },
+  {
+    "block_no": 1078,
+    "doc_idx": 1136,
+    "style": "Heading 3",
+    "text": "11.5 仿真环境建设原则"
+  },
+  {
+    "block_no": 1084,
+    "doc_idx": 1147,
+    "style": "Heading 2",
+    "text": "第12章 试验验证与考核方法"
+  },
+  {
+    "block_no": 1086,
+    "doc_idx": 1149,
+    "style": "Heading 3",
+    "text": "12.1 试验体系"
+  },
+  {
+    "block_no": 1093,
+    "doc_idx": 1156,
+    "style": "Heading 3",
+    "text": "12.2 关键试验项目"
+  },
+  {
+    "block_no": 1095,
+    "doc_idx": 1158,
+    "style": "Heading 4",
+    "text": "12.2.1 静态障碍物识别精度测试"
+  },
+  {
+    "block_no": 1102,
+    "doc_idx": 1165,
+    "style": "Heading 4",
+    "text": "12.2.2 动态目标追踪误差测试"
+  },
+  {
+    "block_no": 1109,
+    "doc_idx": 1172,
+    "style": "Heading 4",
+    "text": "12.2.3 避障响应时间测试"
+  },
+  {
+    "block_no": 1116,
+    "doc_idx": 1179,
+    "style": "Heading 4",
+    "text": "12.2.4 300h避障系统可靠性测试"
+  },
+  {
+    "block_no": 1123,
+    "doc_idx": 1186,
+    "style": "Heading 4",
+    "text": "12.2.5 10km通信延迟测试"
+  },
+  {
+    "block_no": 1130,
+    "doc_idx": 1194,
+    "style": "Heading 4",
+    "text": "12.2.6 30机无碰撞调度测试"
+  },
+  {
+    "block_no": 1137,
+    "doc_idx": 1201,
+    "style": "Heading 4",
+    "text": "12.2.7 空域动态划分响应测试"
+  },
+  {
+    "block_no": 1144,
+    "doc_idx": 1208,
+    "style": "Heading 4",
+    "text": "12.2.8 120h通导监连续运行测试"
+  },
+  {
+    "block_no": 1151,
+    "doc_idx": 1215,
+    "style": "Heading 4",
+    "text": "12.2.9 高低温与强磁环境测试"
+  },
+  {
+    "block_no": 1158,
+    "doc_idx": 1222,
+    "style": "Heading 3",
+    "text": "12.3  验收评审维度"
+  },
+  {
+    "block_no": 1165,
+    "doc_idx": 1229,
+    "style": "Heading 3",
+    "text": "12.4 第三方检测计划"
+  },
+  {
+    "block_no": 1169,
+    "doc_idx": 1233,
+    "style": "Heading 3",
+    "text": "12.5 测试数据记录与报告输出"
+  },
+  {
+    "block_no": 1180,
+    "doc_idx": 1255,
+    "style": "Heading 2",
+    "text": "第13章 研制策划与实施计划"
+  },
+  {
+    "block_no": 1182,
+    "doc_idx": 1257,
+    "style": "Heading 3",
+    "text": "13.1 研制周期"
+  },
+  {
+    "block_no": 1184,
+    "doc_idx": 1259,
+    "style": "Heading 3",
+    "text": "13.2  研制原则"
+  },
+  {
+    "block_no": 1189,
+    "doc_idx": 1264,
+    "style": "Heading 3",
+    "text": "13.3 阶段划分"
+  },
+  {
+    "block_no": 1190,
+    "doc_idx": 1265,
+    "style": "Heading 4",
+    "text": "13.3.1 第一阶段：底层构建与协议开发（1-4个月）"
+  },
+  {
+    "block_no": 1197,
+    "doc_idx": 1272,
+    "style": "Heading 4",
+    "text": "13.3.2 第二阶段：单机应激避障与样机研制（5-8个月）"
+  },
+  {
+    "block_no": 1203,
+    "doc_idx": 1278,
+    "style": "Heading 4",
+    "text": "13.3.3 第三阶段：多机协同与外场联调（9-14个月）"
+  },
+  {
+    "block_no": 1208,
+    "doc_idx": 1284,
+    "style": "Heading 4",
+    "text": "13.3.4 第四阶段：综合演练与验收检测（15-18个月）"
+  },
+  {
+    "block_no": 1215,
+    "doc_idx": 1291,
+    "style": "Heading 3",
+    "text": "13.4 任务分工"
+  },
+  {
+    "block_no": 1225,
+    "doc_idx": 1301,
+    "style": "Heading 3",
+    "text": "13.5 里程碑计划"
+  },
+  {
+    "block_no": 1229,
+    "doc_idx": 1305,
+    "style": "Heading 3",
+    "text": "13.6 质量控制与配置管理"
+  },
+  {
+    "block_no": 1235,
+    "doc_idx": 1312,
+    "style": "Heading 2",
+    "text": "第14章 风险分析与保障措施"
+  },
+  {
+    "block_no": 1237,
+    "doc_idx": 1314,
+    "style": "Heading 3",
+    "text": "14.1 技术风险"
+  },
+  {
+    "block_no": 1238,
+    "doc_idx": 1315,
+    "style": "Heading 4",
+    "text": "14.1.1  0.1s避障响应时间实现难度"
+  },
+  {
+    "block_no": 1241,
+    "doc_idx": 1318,
+    "style": "Heading 4",
+    "text": "14.1.2  低能见度下感知精度退化"
+  },
+  {
+    "block_no": 1244,
+    "doc_idx": 1321,
+    "style": "Heading 4",
+    "text": "14.1.3  强磁环境下导航精度退化"
+  },
+  {
+    "block_no": 1247,
+    "doc_idx": 1324,
+    "style": "Heading 3",
+    "text": "14.2 工程风险"
+  },
+  {
+    "block_no": 1248,
+    "doc_idx": 1325,
+    "style": "Heading 4",
+    "text": "14.2.1  平台重量与功能集成矛盾"
+  },
+  {
+    "block_no": 1251,
+    "doc_idx": 1328,
+    "style": "Heading 4",
+    "text": "14.2.2  120h能源接续的实际连续性"
+  },
+  {
+    "block_no": 1254,
+    "doc_idx": 1331,
+    "style": "Heading 3",
+    "text": "14.3 测试风险"
+  },
+  {
+    "block_no": 1258,
+    "doc_idx": 1335,
+    "style": "Heading 3",
+    "text": "14.4 进度风险"
+  },
+  {
+    "block_no": 1262,
+    "doc_idx": 1339,
+    "style": "Heading 2",
+    "text": "14.6  风险总览与应对措施矩阵"
+  },
+  {
+    "block_no": 1267,
+    "doc_idx": 1346,
+    "style": "Heading 2",
+    "text": "第15章 课题研究成果与交付物"
+  },
+  {
+    "block_no": 1269,
+    "doc_idx": 1348,
+    "style": "Heading 3",
+    "text": "15.1  乙方研制基础"
+  },
+  {
+    "block_no": 1271,
+    "doc_idx": 1350,
+    "style": "Heading 4",
+    "text": "15.1.1  感知避障相关基础"
+  },
+  {
+    "block_no": 1274,
+    "doc_idx": 1353,
+    "style": "Heading 4",
+    "text": "15.1.2  通信与自组网相关基础"
+  },
+  {
+    "block_no": 1278,
+    "doc_idx": 1357,
+    "style": "Heading 4",
+    "text": "15.1.3  多机协同调度相关基础"
+  },
+  {
+    "block_no": 1282,
+    "doc_idx": 1361,
+    "style": "Heading 4",
+    "text": "15.1.4  异构接入与软件系统相关基础"
+  },
+  {
+    "block_no": 1287,
+    "doc_idx": 1366,
+    "style": "Heading 4",
+    "text": "15.1.5  便携式平台与系统集成相关基础"
+  },
+  {
+    "block_no": 1290,
+    "doc_idx": 1369,
+    "style": "Heading 3",
+    "text": "15.2  指标对应基础能力与差距分析"
+  },
+  {
+    "block_no": 1294,
+    "doc_idx": 1374,
+    "style": "Heading 3",
+    "text": "15.3  支撑材料清单"
+  },
+  {
+    "block_no": 1305,
+    "doc_idx": 1390,
+    "style": "Heading 3",
+    "text": "15.4  课题预期研究成果"
+  },
+  {
+    "block_no": 1312,
+    "doc_idx": 1397,
+    "style": "Heading 3",
+    "text": "15.5  申报书交付物清单"
+  },
+  {
+    "block_no": 1316,
+    "doc_idx": 1401,
+    "style": "Heading 3",
+    "text": "15.6  成果权属"
+  },
+  {
+    "block_no": 1323,
+    "doc_idx": 1409,
+    "style": "Heading 2",
+    "text": "第16章 结论"
+  }
+]

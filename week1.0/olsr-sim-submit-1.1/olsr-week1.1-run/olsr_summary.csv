@@ -1,0 +1,28 @@
+=== OLSR Simulation Summary ===
+Scenario,static
+NUavs,30
+SimTime,300s
+Seed,1
+WifiRange,2000m
+OLSR_HelloInterval,2s
+OLSR_TcInterval,5s
+
+--- Per-Flow Metrics ---
+FlowID,SrcAddr,DstAddr,TxPkts,RxPkts,PDR,LostPkts,MeanDelay_ms,MaxDelay_ms,Jitter_ms,TxBytes,RxBytes
+1,10.1.0.5,10.1.0.1,2,2,100.00%,0,8,7,7,568,568
+2,10.1.0.10,10.1.0.1,2,2,100.00%,0,10,9,8,568,568
+3,10.1.0.15,10.1.0.1,2,2,100.00%,0,26,24,22,568,568
+4,10.1.0.20,10.1.0.1,2,2,100.00%,0,39,37,36,568,568
+5,10.1.0.26,10.1.0.1,2,2,100.00%,0,22,20,18,568,568
+
+--- Aggregate ---
+TotalTxPkts,10
+TotalRxPkts,10
+OverallPDR,100.0000%
+AvgPDR,100.0000%
+AvgDelay_ms,10.5000
+FlowCount,5
+
+--- Total Channel Activity (all PHY TX, incl. OLSR + app) ---
+TotalPhyTxBytes,1092364
+TotalAppPkts,10

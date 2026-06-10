@@ -125,7 +125,7 @@ static void DeployNodes(NodeContainer &uavNodes, NodeContainer &bsNode,
     // 簇头 ID：等距分布在 10% / 27.5% / 45% / 62.5% / 80% 位置
     double chPositions[] = {0.10, 0.275, 0.45, 0.625, 0.80};
     bool isClusterHead[30] = {false};
-    for (uint32_t i = 0; i < g_config.nClusterHeads && i < 5; i++) {
+    for (uint32_t i = 0; i < g_config.nClusterHeads && i < 5u; i++) {
         int idx = static_cast<int>(chPositions[i] * g_config.nUavs);
         if (idx >= (int)g_config.nUavs) idx = g_config.nUavs - 1;
         isClusterHead[idx] = true;
@@ -145,7 +145,7 @@ static void DeployNodes(NodeContainer &uavNodes, NodeContainer &bsNode,
     for (uint32_t i = 0; i < g_config.nUavs; i++) {
         NodeRole role = isClusterHead[i] ? CLUSTER_HEAD : ORDINARY_UAV;
         uint32_t clusterId = 0;
-        for (uint32_t c = 0; c < g_config.nClusterHeads && c < 5; c++) {
+        for (uint32_t c = 0; c < g_config.nClusterHeads && c < 5u; c++) {
             if (i == clusterHeadIds[c]) {
                 clusterId = c + 1;
                 break;
@@ -316,9 +316,7 @@ static void TxTrace(std::string context, Ptr<const Packet> packet)
 // ============================================================
 // 写摘要 CSV
 // ============================================================
-static void WriteSummary(Ptr<FlowMonitor> monitor,
-                           Ptr<Ipv4FlowClassifier> classifier,
-                           const std::string &csvPath)
+static void WriteSummary(Ptr<FlowMonitor> monitor, FlowMonitorHelper& flowmon, const std::string &csvPath)
 {
     std::ofstream csv(csvPath);
     csv << "=== OLSR Simulation Summary ===" << std::endl;
@@ -333,6 +331,8 @@ static void WriteSummary(Ptr<FlowMonitor> monitor,
 
     // FlowMonitor 统计
     monitor->CheckForLostPackets();
+    Ptr<Ipv4FlowClassifier> classifier = 
+        DynamicCast<Ipv4FlowClassifier>(flowmon.GetClassifier());
     FlowMonitor::FlowStatsContainer stats = monitor->GetFlowStats();
 
     csv << "--- Per-Flow Metrics ---" << std::endl;
@@ -553,8 +553,7 @@ int main(int argc, char *argv[])
     monitor->SerializeToXmlFile(flowmonPath, true, true);
 
     std::string csvPath = g_config.resultsDir + "/olsr_summary.csv";
-    Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier>(flowmon.GetClassifier());
-    WriteSummary(monitor, classifier, csvPath);
+    WriteSummary(monitor, flowmon, csvPath);
 
     std::string jsonPath = g_config.resultsDir + "/olsr_run_config.json";
     WriteConfigJSON(jsonPath);

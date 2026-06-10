@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="960" viewBox="0 0 1600 960">
+<rect x="0" y="0" width="1600" height="960" rx="0" fill="#f4f7fb" stroke="none" stroke-width="0" opacity="1"/>
+<text x="55" y="76" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="40" font-weight="700" fill="#1f2a37" text-anchor="start">OLSR 静态场景基线仿真结果</text>
+<text x="57" y="110" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="22" font-weight="400" fill="#536276" text-anchor="start">NS-3.43 / Ubuntu 虚拟机 / 30 架无人机 / 仿真时长 300 秒 / 随机种子 1</text>
+<rect x="55" y="136" width="690" height="405" rx="14" fill="#ffffff" stroke="#cfd8e3" stroke-width="1.2" opacity="1"/>
+<rect x="855" y="136" width="690" height="405" rx="14" fill="#ffffff" stroke="#cfd8e3" stroke-width="1.2" opacity="1"/>
+<rect x="55" y="592" width="1490" height="330" rx="14" fill="#ffffff" stroke="#cfd8e3" stroke-width="1.2" opacity="1"/>
+<text x="79" y="179" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="25" font-weight="700" fill="#243142" text-anchor="start">各业务流投递率</text>
+<text x="879" y="179" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="25" font-weight="700" fill="#243142" text-anchor="start">端到端时延与抖动</text>
+<line x1="125" y1="436" x2="700" y2="436" stroke="#d9e2ec" stroke-width="1"/>
+<text x="105" y="442" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="15" font-weight="400" fill="#64748b" text-anchor="end">0</text>
+<line x1="125" y1="379.5" x2="700" y2="379.5" stroke="#d9e2ec" stroke-width="1"/>
+<text x="105" y="385.5" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="15" font-weight="400" fill="#64748b" text-anchor="end">25</text>
+<line x1="125" y1="323" x2="700" y2="323" stroke="#d9e2ec" stroke-width="1"/>
+<text x="105" y="329" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="15" font-weight="400" fill="#64748b" text-anchor="end">50</text>
+<line x1="125" y1="266.5" x2="700" y2="266.5" stroke="#d9e2ec" stroke-width="1"/>
+<text x="105" y="272.5" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="15" font-weight="400" fill="#64748b" text-anchor="end">75</text>
+<line x1="125" y1="210" x2="700" y2="210" stroke="#d9e2ec" stroke-width="1"/>
+<text x="105" y="216" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="15" font-weight="400" fill="#64748b" text-anchor="end">100</text>
+<line x1="125" y1="210" x2="125" y2="436" stroke="#94a3b8" stroke-width="1.4"/>
+<line x1="125" y1="436" x2="700" y2="436" stroke="#94a3b8" stroke-width="1.4"/>
+<text transform="rotate(-90 81 330)" x="81" y="330" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="16" font-weight="400" fill="#475569" text-anchor="middle">投递率（%）</text>
+<rect x="146.5" y="210" width="72" height="226" rx="9" fill="#2f855a" stroke="none" stroke-width="0" opacity="1"/>
+<text x="182.5" y="199" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="17" font-weight="400" fill="#1f2a37" text-anchor="middle">100%</text>
+<text x="182.5" y="467" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="16" font-weight="400" fill="#1f2a37" text-anchor="middle">业务流1</text>
+<text x="182.5" y="492" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="14" font-weight="400" fill="#667085" text-anchor="middle">10.1.0.5</text>
+<rect x="261.5" y="210" width="72" height="226" rx="9" fill="#2f855a" stroke="none" stroke-width="0" opacity="1"/>
+<text x="297.5" y="199" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="17" font-weight="400" fill="#1f2a37" text-anchor="middle">100%</text>
+<text x="297.5" y="467" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="16" font-weight="400" fill="#1f2a37" text-anchor="middle">业务流2</text>
+<text x="297.5" y="492" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="14" font-weight="400" fill="#667085" text-anchor="middle">10.1.0.10</text>
+<rect x="376.5" y="210" width="72" height="226" rx="9" fill="#2f855a" stroke="none" stroke-width="0" opacity="1"/>
+<text x="412.5" y="199" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="17" font-weight="400" fill="#1f2a37" text-anchor="middle">100%</text>
+<text x="412.5" y="467" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="16" font-weight="400" fill="#1f2a37" text-anchor="middle">业务流3</text>
+<text x="412.5" y="492" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="14" font-weight="400" fill="#667085" text-anchor="middle">10.1.0.15</text>
+<rect x="491.5" y="210" width="72" height="226" rx="9" fill="#2f855a" stroke="none" stroke-width="0" opacity="1"/>
+<text x="527.5" y="199" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="17" font-weight="400" fill="#1f2a37" text-anchor="middle">100%</text>
+<text x="527.5" y="467" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="16" font-weight="400" fill="#1f2a37" text-anchor="middle">业务流4</text>
+<text x="527.5" y="492" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="14" font-weight="400" fill="#667085" text-anchor="middle">10.1.0.20</text>
+<rect x="606.5" y="210" width="72" height="226" rx="9" fill="#2f855a" stroke="none" stroke-width="0" opacity="1"/>
+<text x="642.5" y="199" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="17" font-weight="400" fill="#1f2a37" text-anchor="middle">100%</text>
+<text x="642.5" y="467" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="16" font-weight="400" fill="#1f2a37" text-anchor="middle">业务流5</text>
+<text x="642.5" y="492" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="14" font-weight="400" fill="#667085" text-anchor="middle">10.1.0.26</text>
+<text x="79" y="521" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="17" font-weight="400" fill="#344054" text-anchor="start">5 条业务流均收到 2/2 个应用包，投递率均为 100%。</text>
+<line x1="925" y1="436" x2="1500" y2="436" stroke="#d9e2ec" stroke-width="1"/>
+<text x="905" y="442" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="15" font-weight="400" fill="#64748b" text-anchor="end">0</text>
+<line x1="925" y1="360.6666666666667" x2="1500" y2="360.6666666666667" stroke="#d9e2ec" stroke-width="1"/>
+<text x="905" y="366.6666666666667" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="15" font-weight="400" fill="#64748b" text-anchor="end">15</text>
+<line x1="925" y1="285.33333333333337" x2="1500" y2="285.33333333333337" stroke="#d9e2ec" stroke-width="1"/>
+<text x="905" y="291.33333333333337" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="15" font-weight="400" fill="#64748b" text-anchor="end">30</text>
+<line x1="925" y1="210" x2="1500" y2="210" stroke="#d9e2ec" stroke-width="1"/>
+<text x="905" y="216" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="15" font-weight="400" fill="#64748b" text-anchor="end">45</text>
+<line x1="925" y1="210" x2="925" y2="436" stroke="#94a3b8" stroke-width="1.4"/>
+<line x1="925" y1="436" x2="1500" y2="436" stroke="#94a3b8" stroke-width="1.4"/>
+<text transform="rotate(-90 881 330)" x="881" y="330" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="16" font-weight="400" fill="#475569" text-anchor="middle">时间（毫秒）</text>
+<rect x="1251" y="160" width="22" height="22" rx="0" fill="#2f78a8" stroke="none" stroke-width="0" opacity="1"/>
+<text x="1283" y="178" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="16" font-weight="400" fill="#344054" text-anchor="start">平均时延</text>
+<rect x="1385" y="160" width="22" height="22" rx="0" fill="#c7782d" stroke="none" stroke-width="0" opacity="1"/>
+<text x="1417" y="178" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="16" font-weight="400" fill="#344054" text-anchor="start">抖动</text>
+<rect x="944.5" y="395.8222222222222" width="34" height="40.17777777777778" rx="5" fill="#2f78a8" stroke="none" stroke-width="0" opacity="1"/>
+<rect x="986.5" y="400.84444444444443" width="34" height="35.15555555555556" rx="5" fill="#c7782d" stroke="none" stroke-width="0" opacity="1"/>
+<text x="961.5" y="386.8222222222222" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="14" font-weight="400" fill="#1f2a37" text-anchor="middle">8</text>
+<text x="1003.5" y="391.84444444444443" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="14" font-weight="400" fill="#1f2a37" text-anchor="middle">7</text>
+<text x="982.5" y="467" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="16" font-weight="400" fill="#1f2a37" text-anchor="middle">业务流1</text>
+<rect x="1059.5" y="385.77777777777777" width="34" height="50.22222222222222" rx="5" fill="#2f78a8" stroke="none" stroke-width="0" opacity="1"/>
+<rect x="1101.5" y="395.8222222222222" width="34" height="40.17777777777778" rx="5" fill="#c7782d" stroke="none" stroke-width="0" opacity="1"/>
+<text x="1076.5" y="376.77777777777777" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="14" font-weight="400" fill="#1f2a37" text-anchor="middle">10</text>
+<text x="1118.5" y="386.8222222222222" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="14" font-weight="400" fill="#1f2a37" text-anchor="middle">8</text>
+<text x="1097.5" y="467" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="16" font-weight="400" fill="#1f2a37" text-anchor="middle">业务流2</text>
+<rect x="1174.5" y="305.4222222222222" width="34" height="130.57777777777775" rx="5" fill="#2f78a8" stroke="none" stroke-width="0" opacity="1"/>
+<rect x="1216.5" y="325.5111111111111" width="34" height="110.48888888888888" rx="5" fill="#c7782d" stroke="none" stroke-width="0" opacity="1"/>
+<text x="1191.5" y="296.4222222222222" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="14" font-weight="400" fill="#1f2a37" text-anchor="middle">26</text>
+<text x="1233.5" y="316.5111111111111" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="14" font-weight="400" fill="#1f2a37" text-anchor="middle">22</text>
+<text x="1212.5" y="467" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="16" font-weight="400" fill="#1f2a37" text-anchor="middle">业务流3</text>
+<rect x="1289.5" y="240.13333333333333" width="34" height="195.86666666666667" rx="5" fill="#2f78a8" stroke="none" stroke-width="0" opacity="1"/>
+<rect x="1331.5" y="255.2" width="34" height="180.8" rx="5" fill="#c7782d" stroke="none" stroke-width="0" opacity="1"/>
+<text x="1306.5" y="231.13333333333333" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="14" font-weight="400" fill="#1f2a37" text-anchor="middle">39</text>
+<text x="1348.5" y="246.2" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="14" font-weight="400" fill="#1f2a37" text-anchor="middle">36</text>
+<text x="1327.5" y="467" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="16" font-weight="400" fill="#1f2a37" text-anchor="middle">业务流4</text>
+<rect x="1404.5" y="325.5111111111111" width="34" height="110.48888888888888" rx="5" fill="#2f78a8" stroke="none" stroke-width="0" opacity="1"/>
+<rect x="1446.5" y="345.6" width="34" height="90.4" rx="5" fill="#c7782d" stroke="none" stroke-width="0" opacity="1"/>
+<text x="1421.5" y="316.5111111111111" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="14" font-weight="400" fill="#1f2a37" text-anchor="middle">22</text>
+<text x="1463.5" y="336.6" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="14" font-weight="400" fill="#1f2a37" text-anchor="middle">18</text>
+<text x="1442.5" y="467" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="16" font-weight="400" fill="#1f2a37" text-anchor="middle">业务流5</text>
+<text x="879" y="521" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="17" font-weight="400" fill="#344054" text-anchor="start">当前统计来自少量应用包，后续正式评估需要增加业务量和多随机种子。</text>
+<text x="79" y="635" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="25" font-weight="700" fill="#243142" text-anchor="start">结果摘要</text>
+<text x="85" y="672" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="20" font-weight="400" fill="#344054" text-anchor="start">场景：静态 OLSR 基线；节点规模：地面站 1 个 + 无人机 30 架；无线通信范围：2000 米。</text>
+<text x="85" y="706" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="20" font-weight="400" fill="#344054" text-anchor="start">总体结果：发送应用包 10 个，接收应用包 10 个，总体投递率 100.0%，平均时延 10.5 毫秒。</text>
+<text x="85" y="740" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="20" font-weight="400" fill="#344054" text-anchor="start">信道活动：物理层总发送 1,092,364 字节，包含 OLSR 路由控制开销和应用数据。</text>
+<text x="85" y="774" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="20" font-weight="400" fill="#344054" text-anchor="start">路由现象：路由日志中可看到多跳路径，最大跳数约 5 跳，说明 OLSR 在该静态链式场景下已形成转发路径。</text>
+<text x="85" y="808" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="20" font-weight="400" fill="#344054" text-anchor="start">注意：这是第一版跑通结果，不是最终性能结论；目前总应用包数较少，平均/最大时延字段还需要用原始 FlowMonitor 再核对。</text>
+<rect x="83" y="858" width="1434" height="42" rx="8" fill="#fff5d6" stroke="#e9a23b" stroke-width="1" opacity="1"/>
+<text x="99" y="885" font-family="Noto Sans SC, Microsoft YaHei, SimHei, Arial, sans-serif" font-size="17" font-weight="400" fill="#5f3b00" text-anchor="start">汇报口径：已完成 OLSR/NS-3 基线场景跑通和结果导出；未完成多场景、多随机种子、移动性、弱链路和协议对比。</text>
+</svg>

@@ -1,0 +1,1554 @@
+[0548] <Heading 4> 5.5.5  通信子系统实施步骤
+[0549] <Normal> 通信子系统的实施划分为四个阶段，各阶段目标层层递进。第一阶段（第1至4月），核心任务是把物理层的关键参数从设计图纸落到可测试的原型上。具体来说，需在实验室环境中以软件无线电平台（USRP或AD936x评估板均可）搭建TDMA帧结构原型与COFDM收发链路原型，验证30ms帧/36时隙的PHY层闭环行为，以及64子载波COFDM的AMC自适应切换功能。GFSK调制解调的FPGA/ASIC实现方案选型和初步逻辑设计也在本阶段完成。此外，簇头选举算法的仿真验证同步推进，在MATLAB或Python环境中模拟30架无人机的位置变化与电量消耗，重点考察四维加权选举的稳定性和备份接管延迟。这一阶段说到底是在为后续集成打底，任何在仿真层面未解决的参数问题，到了联调阶段代价只会更高。
+[0550] <Normal> 第二阶段（第5至8月），重心从物理层转向协议栈的完整实现。需要完成的模块包括：TDMA MAC层（时隙分配与调度器）、COFDM MAC层（AMC控制环路与QoS车道调度器）、简化AODV路由协议，以及簇头选举与备份协议。要在不少于5个物理节点的自组网测试床上跑通基本功能，覆盖簇建立、簇头切换、多跳路由和双链路隔离这几个关键场景。H.265视频编码器在机载嵌入式平台（海思或RK3588编码器IP）上的移植与实时编码验（2Mbps@1080p@30fps）也在本阶段收口。
+[0551] <Normal> 第三阶段（第9至14月），进入外场联调，规模逐步扩展。5机阶段的重点是TDMA时隙分配与多机时钟同步精度，使用GNSS授时基准测试仪测量各节点时钟偏差，这是后续规模扩展的基础。10机阶段转向COFDM链路在多机并发上行条件下的吞吐量表现，需在10km轴线内各距离点实测链路SNR与实际吞吐量，绘制距离-吞吐量曲线，AMC档位分布同步记录。20机阶段专项验证双链路隔离的有效性：在视频流满载COFDM链路（4路2Mbps视频并发）的条件下，观测控制链路的延迟与丢包率是否受到影响，这是判断隔离机制是否真正有效的直接判据。30机阶段做全系统通信压力测试，30机同时上行遥测、感知与4路视频，测量COFDM链路总吞吐量与各车道保底带宽的兑现情况。
+[0552] <Normal> 第四阶段（第15至18月），综合演练与验收。核心场景是模拟三断条件下的全系统通信运行：关闭公网与市电，仅靠自组网和系统自带电源维持30架无人机在10km轴线内的全部通信，连续运行不低于2小时，全时段记录链路质量日志，包括SNR、PER、AMC档位分布、各车道吞吐量及各优先级指令的端到端延迟统计，最终生成通信子系统性能评估报告。除此之外，还需验证通信异常四级安全策略的逐级触发与恢复，演练中有意注入链路劣化（使用可调衰减器逐步降低信号强度），考察系统能否按策略正确逐级降级并恢复。这是整个子系统可靠性的最终背书。
+层级 | 部署位置 | 核心模块 | 输入 | 输出 | 运行周期/延迟
+全局调度层 | 地面空管平台 | 任务分配器、 4D栅格管理器、 冲突检测器、 冲突消解器、 空域管理器 | 30机状态上报、 操作员任务需求、 空域配置 | 每机调度指令： 期望航迹/速度调整/ 高度调整/等待指令 | 100ms周期 (冲突检测10Hz)
+局部执行与 边缘自治层 | 机载伴飞节点 (每机独立) | 指令接收/安全过滤、 边缘消解引擎、 本地栅格子集维护 | 地面调度指令、 机载感知障碍物、 本地4D快照 | 安全过滤后送飞控、 局部消解决策 (仅链路异常时) | 正常模式<2ms 边缘模式≤10ms
+飞控执行层 | 机载飞控 (LiteOS-M) | 姿态控制、 电机/舵机驱动 | 期望航迹或 姿态指令 | 执行器指令 (PWM/油门) | 5ms内核调度周期
+[/TABLE]
+参数 | 取值 | 依据
+栅格空间分辨率 | 1m×1m×1m | 感知系统障碍物识别精度(≤0.5m)的2倍, 确保冲突检测不漏判
+时间分辨率 | 0.1s | 与TDMA帧周期(30ms×3≈100ms)和 避障响应时间(≤0.1s)匹配
+前向预测窗口 | 10s | 冲突定义的时间边界-10s内轨迹距离 小于安全间隔即判定为潜在冲突
+静态环境安全间距 | 3m | 识别误差0.5m + 飞控跟踪误差0.5m + 安全裕度2m
+动态目标安全间距 | 5m | 追踪误差0.3m + 对方机动不确定度2m + 安全裕度2.7m
+不确定椭球扩展 | 3σ | 对应99.7%置信区间, 确保在正常定位误差范围内保护区覆盖真实占用
+活跃体素数量 | ~6,000/30机 | 每机10s窗口内约200个体素, 稀疏哈希存储,内存占用<10MB
+[/TABLE]
+冲突等级 | 判定条件 | 剩余时间窗口 | 系统动作 | 界面显示
+提示级 (INFO) | 两机预测在5-10s内 进入安全间距, 当前航迹交叉但时间充裕 | 5-10s | 不主动干预, 在态势界面上标注 潜在航迹交叉点 | 黄色圆点标注在 交叉位置, 操作员知悉即可
+预警级 (WARNING) | 两机预测在2-5s内 进入安全间距, 或单机航迹将在3-5s 内进入禁飞区边缘 | 2-5s | 主动向受影响无人机 发送航迹调整建议 (通过数据链路, 非强制指令) | 橙色高亮标注冲突 区域和受影响航迹, 提示操作员关注
+紧急级 (CRITICAL) | 两机预测在0.5-2s内 进入安全间距, 或单机航迹已进入 禁飞区/已触发通道违规 | 0.5-2s | 立即下发强制消解 指令(通过控制链路, 最高优先级), 自动执行不经确认 | 红色闪烁告警 +声音提示, 显示消解方案 和执行状态
+[/TABLE]
+阶段 | 时间 | 工作内容 | 交付/验证方式 | 与总体计划对应
+第一阶段 调度框架搭建 | 第1-4月 | 搭建集中式调度框架原型： 实现无人机状态上报-地面接收- 指令下发链路闭环； 定义4D栅格数据结构和 序列化接口规范； 实现单机-地面指令链路的 编解码和确认全套流程 | 在仿真环境中验证单机 指令闭环延迟≤50ms； 4D栅格数据结构规范 文档（作为第10章 代码原型接口样例交付） | 第一阶段： 底层构建与 协议开发
+第二阶段 算法研发与 仿真验证 | 第5-8月 | 完成4D栅格完整模型： 栅格构建、占用更新、 增量同步和查询接口全部实现； 完成冲突检测算法并验证 检测正确率； 完成基础冲突消解算法 （两种原语：变速+变高）； 实现集中式任务分配器 （拍卖算法） | 在仿真环境中注入30机 密集交叉航线（比外场 更严苛的条件），验证： 冲突检测正确率≥99%, 误报率<5%； 消解算法在仿真中 通过1000+场景测试 | 第二阶段： 单机应激避障 与样机研制
+第三阶段 全功能联调 与扩展 | 第9-14月 | 完成多机冲突消解全功能： 新增航线绕行和悬停等待 两种原语； 实现边缘自治消解模块及 CBBA局部任务协商； 完成空域动态划分和 违规航迹重规划； 完成消解后任务重规划 （路径搜索） | 从5机→10机→20机→30机 逐步扩展外场联调； 每规模阶段验证集中式 调度与边缘自治的切换 （注入通信中断）； 空域重构≤10s验证 | 第三阶段： 集群联调与 指标攻坚
+第四阶段 综合演练 与验收 | 第15-18月 | 完成全系统集成和验收测试： 30机综合演练-在10km 轴线内同时执行侦察/中继/ 投送/照明四种任务类型； 便携式空管平台现场部署, 通信完全依赖自组网； 99.9%调度成功率统计验证； 边缘自治消解延迟≤10ms验证 | 30架机群航迹分析报告； 分布式消解统计数据； 验收测试报告； 从演练日志中统计无碰撞 调度成功率≥99.9% | 第四阶段： 综合演练与 验收结题
+[/TABLE]
+接入层次 | 核心需求 | 关键约束 | 对应技术手段
+物理接入层 | 多频段多制式数传/图传链路接入 | 支持2.4G/1.4G/433M/800M 主流频段 | 多模网关射频前端, 频段自动扫描匹配
+协议解析层 | 自动识别协议类型, 走对应适配通道 | 开放协议≤10s注册, 封闭协议≤30s纳管 | 协议指纹识别引擎, 预置协议模板库
+设备抽象层 | 向上提供统一的 设备状态视图和接口 | 屏蔽飞控/链路/传感器 异构差异 | HDF设备驱动框架, 统一设备信息模型
+管理流程层 | 从注册到离网的 全流程闭环管控 | 每步有超时阈值和 异常处理策略 | 设备生命周期状态机, 分布式软总线协同
+[/TABLE]
+协议类型 | 帧特征示例 | 注册流程 | 端到端接入时间
+MAVLink v1/v2 | 帧头0xFE, 固定帧结构, 心跳1Hz, SYS_ID+COMP_ID | 协议识别→参数查询 →能力上报→注册完成 | ≤10s
+DroneKit/ArduPilot | 基于MAVLink变体, 消息ID空间不同, 心跳频率可配 | 同MAVLink通道, 增加参数列表拉取 | ≤10s
+DJI OSDK/MSDK | 私有二进制帧, 固定帧头0x55AA, 周期性ACK/NAK | 识别→加载预置适配器 →握手认证→能力协商 | ≤30s
+私有封闭协议A类 | 厂商自定义帧结构, 需预置模板 | 识别→匹配预置适配器 →有限能力上报→注册 | ≤30s
+未知协议 | 无匹配模板, 特征向量超出阈值 | 人工确认→离线分析 →模板入库（事后） | 人工介入, 不在自动时限内
+[/TABLE]
+    软总线的会话管理覆盖从设备互不可见到全双工数据通信的完整过程，可拆分为四个阶段来理解。第一阶段是设备发现（Discovery）。每个节点的软总线服务启动后，会在TDMA的预留广播时隙内向网络发送一条Discovery报文。这是广播时隙，不参与业务时隙的竞争。报文携带三类信息：节点类型（机载/网关/地面站/基站代理）、全局唯一标识（设备序列号或MAC地址的SHA-256哈希前16字节），以及初始能力摘要（支持的协议版本、最大消息长度、安全能力等）。收到报文的节点将发送方加入本地设备列表并回复Ack。发现延迟由广播时隙的出现周期决定，时隙每100ms出现一次，首次广播与时隙之间的平均等待时间约为50ms，这也就是发现延迟的期望值。会话建立（Session Establishment）紧随其后。发现完成后，发起方通常是地面站或网关，向目标节点发送SessionRequest报文，双方经由三次握手（Request→Accept→Confirm）协商会话参数：MTU由底层COFDM链路的当前AMC档位决定，64QAM时为1500字节，QPSK时降至256字节；心跳间隔默认1秒，在TDMA控制时隙中发送，不占用业务时隙；会话超时默认5秒，5秒内未收到心跳即判定会话失效并触发自动重连。三次握手中任何一步超时（超时窗口=2×心跳间隔+往返时间估计），会话建立即告失败并回退至Discovery状态。它是在主动规避半开连接（half-open connection）长期挂在会话表中的问题。第三阶段是状态同步（State Sync）。会话建立后，双方立即交换初始状态：机载端全量上报当前的DroneState和DroneCapability（约2-5KB），地面端则下发全局配置，空域边界多边形顶点列表、禁飞区geofence定义、当前任务列表，全量约3-10KB。初始同步完成后，后续更新切换为增量推送，仅发送变化字段（如位置从(x1,y1,z1)更新为(x2,y2,z2)时只推送位置字段的新值），单条增量报文约50-200字节。这里有一个数字可以说明问题：若不使用增量，30架飞机以10Hz频率并发上报、每次2KB，带宽消耗约为600KB/s，折合近4.8Mbps；增量方案在30架机群并发场景下的节约效果，由此可见。引入增量机制后，典型传输速率降至约30架×10Hz×100B=30KB/s，折合约240Kbps，这一数字仅占COFDM控制链路最低AMC档（2Mbps BPSK）的12%左右，带宽余量相当可观。阶段四是会话维护（Session Maintenance）。会话激活之后，双方按心跳间隔周期性地交换HeartbeatMsg。心跳报文的设计并非单纯的存活探测，它同时承载轻量级的增量状态更新，将位置、电量等高频变化字段的当前值直接嵌入报文，从而避免为状态同步额外发包。这个设计决策背后的逻辑是减少报文数量。当连续N个心跳周期（N=3，默认值）未收到对端响应时，软总线判定会话超时，随即触发拆除流程：发出SessionClose通知（尽力而为，UDP层面不保证送达），释放会话ID，向所有订阅了该设备Topic的上层模块推送设备离线事件，并将注册表中的设备状态更新为OFFLINE。会话超时并不触发注册信息的删除。设备能力、协议类型、历史连接记录等仍保留在注册表中，这一保留策略的意义，在设备重新上线时才完全显现：重连方可跳过发现与注册阶段，直接进入会话恢复。快速重连的延迟大致等于SessionRequest-Accept-Confirm三次握手所需时间，约3×RTT，实测在15至30ms之间。
+阶段 | 核心操作 | 关键报文 | 时长/延迟 | 失败处理
+Discovery (发现) | 广播节点信息 收集对等方列表 | Discovery DiscoveryAck | ≤100ms (广播时隙周期) | 周期性重试 (每100ms广播一次 直到收到Ack或超时)
+Establish (会话建立) | 三次握手 协商会话参数 | SessionRequest SessionAccept SessionConfirm | 3×RTT (约15-30ms) | 回退至Discovery 释放半开连接资源
+Sync (状态同步) | 交换初始状态 全量→增量 | StateSyncReq StateSyncRsp | 1×RTT+传输时延 (大包约50-200ms) | 重试3次 仍失败则拆除会话
+Maintain (会话维护) | 心跳+增量更新 超时检测 | HeartbeatMsg SessionClose | 心跳间隔1s 超时检测5s | 触发会话拆除 保留注册信息 支持快速重连
+[/TABLE]
+任务协议翻译层做的事，是把地面平台的统一任务接口：takeoff、land、goto、upload_mission等翻译为对应的MAVLink消息序列，并处理ACK/NACK反馈。这个翻译层的存在，本质上是在抹平上层接口与底层协议之间的语义落差。版本兼容的处理方式：同时支持MAVLink v1和v2，以消息ID为区分依据，ID不超过255的消息在两个版本中格式一致，v2的扩展帧仅在ID大于255时启用；心跳消息中携带的版本信息作为辅助判定依据。这个设计的好处是向下兼容的代价很小。
+适配要素 | 开放协议通道（MAVLink等） | 封闭协议预置通道
+协议信息来源 | 公开规范文档+开源协议栈 | 厂商合作协议/SDK/逆向分析
+适配开发方式 | 标准MAVLink协议栈实现 | 逐机型开发HDI驱动实例
+开发周期 | MAVLink核心适配约4周, 后续增量维护 | 每机型约2-3周适配开发 +1周闭环测试
+现场注册时间 | ≤10s | ≤30s
+能力覆盖度 | MAVLink消息全集 | 最小必要指令集 （以能力和需求匹配为界）
+非预置机型处理 | — | 透明转发模式, 不提供统一管理调度
+可扩展性 | MAVLink新版本消息 向后兼容 | 新增机型仅需新增HDI实例, 上下层接口不变
+[/TABLE]
+数据结构 | 更新频率 | 主要字段 | 用途
+DroneState | 1-5Hz (按任务阶段可调) | 位置/速度/姿态/电量/ 飞行模式/健康状态/ 任务状态/时间戳 | 态势显示、 任务调度决策、 异常检测
+DroneCapability | 注册时一次性拉取, 仅在固件升级/载荷 变更时更新 | 最大速度/高度/续航/ 载荷类型/支持飞行模式/ 接口版本 | 任务分配约束、 能力匹配检查、 机型信息展示
+HeartbeatMsg | 1Hz固定 | 在线状态/最后心跳时间/ 链路延迟/丢包率/故障码 | 设备在线检测、 链路质量评估、 离网超时触发
+[/TABLE]
+原子性是第一个原则。每个接口只完成一个明确的飞行控制语义动作，不存在执行复杂序列这类复合接口，复杂任务的编排，是上层调度器的职责，而非接口本身应当承担的负担。幂等性紧随其后：同一指令在短时间内重复下发不产生副作用，以连续两次takeoff为例，第二次调用直接返回已处于飞行状态，不会重新触发起飞序列。第三个原则是超时可中断，每个接口调用携带超时参数，超时后网关主动放弃等待并向上层返回超时错误。
+指令 | 优先级 | 互斥关系 | 典型超时 | 超时处理
+emergency_stop | PRI_CRITICAL | 抢占所有指令 | 0.5s | 重试3次后触发 通信异常安全策略
+return_home | PRI_CRITICAL | 抢占基本飞行和 导航指令 | 1.0s | 重试3次后触发 通信异常安全策略
+takeoff/land/hover | PRI_HIGH | 相互互斥 | 3.0s | 超时返回错误, 由调度器决定重试 或切换策略
+goto_waypoint(s) | PRI_HIGH | 与悬停/着陆互斥, 与速度控制互斥 | 3.0s | 超时返回错误, 无人机保持当前状态
+set_velocity | PRI_HIGH | 与航点导航互斥 | 2.0s | 超时后自动切回 悬停模式
+upload_mission | PRI_NORMAL | 无互斥 | 15.0s | 重试1次后返回错误
+get_state/capability | PRI_NORMAL | 无互斥 | 1.0s | 使用缓存值兜底, 不阻塞调用方
+[/TABLE]
+实施阶段 | 时间 | 核心工作 | 验证方式 | 里程碑
+第一阶段 协议指纹基础 | 第1-4月 | 协议指纹识别引擎开发, MAVLink适配器基本功能, ≥5种协议离线样本验证 | 离线抓包样本集测试, 识别准确率≥95% | 协议指纹引擎 单机测试通过
+第二阶段 统一模型与适配 | 第5-8月 | 统一信息模型实现, UCI定义与SDK封装, ≥3种封闭协议适配, ≥5机仿真并发验证 | 仿真环境全流程测试, 并发注册/监控/任务 下发均通过 | 仿真环境 多机型并发验证
+第三阶段 扩展与优化 | 第9-13月 | 封闭协议扩展至≥5种, 抗丢包优化, 软总线协同集成, 透明转发模式实现 | 10%丢包率下识别 准确率≥90%, 端到端自动化链路通畅 | 软总线集成 测试通过
+第四阶段 外场联调 | 第14-18月 | 外场≥10架异构机联调, 全流程指标验证, 增量适配与回归测试 | 开放协议≤10s注册, 封闭协议≤30s纳管, 并发≥30架, 指令响应≤200ms | 外场联调 全部指标达标
+[/TABLE]
+组成单元 | 核心功能 | 关键参数 | 重量估算 | 备件策略
+计算单元 | 运行全部空管软件: 调度/栅格/冲突/设备/ 态势/数据记录/电源管理 | CPU≥8核, ≥2.5GHz, RAM≥32GB LPDDR5/DDR5, SSD≥512GB NVMe(系统盘), 无风扇壳体散热 | ≤5kg (含加固机箱) | 建议1台备机, 故障时整体更换 (5min内恢复)
+通信基站 | 1.4GHz TDMA控制链路+ 2.4GHz COFDM数据/图传 链路射频收发与基带处理 | 双频双模独立射频前端, FPGA基带, ARM Cortex-A应用处理器, 千兆以太网接口 | ≤3kg | 建议1台备机, 与计算单元独立 更换互不影响
+显示交互 终端 | 态势地图/机群列表/ 空域编辑/任务下发/ 告警提示/数据回放 | ≥15.6″, ≥1000cd/m², IP65前面板, 手套触控, 1920×1080, 光学贴合 | ≤3kg | 可用民用高亮 显示器临时替代, 功能降级但可用
+自组网设备 (室外天线) | 控制链路全向天线×2+ 数据链路定向天线×1+ 伸缩天线杆3-5m | 全向3-5dBi/1.4GHz, 定向10-12dBi/2.4GHz, 天线杆+三脚架+馈线 | ≤4kg | 馈线备件1套, 天线本身可靠性 极高无需备件
+数据记录 单元 | 独立SSD持续写入 所有飞行数据 (航迹/指令/告警/日志) | ≥1TB工业级宽温SSD, M.2独立插槽, 独立分区/文件系统 | ≤0.2kg | 无需备件, SSD故障不影响 飞行任务
+电源管理 单元 | 外部能源→多路DC输出, 超级电容热插拔, 各单元功耗监测, 电池SOC/SOH读取 | 输入16-36VDC, 输出19V/12V/5V, 总功率≤200W, 独立MCU控制 | ≤1.5kg | 建议1台备件, 模块化接插件 快速更换
+三防箱组 | IP65防护, 定制泡沫衬垫固定各单元, 滚轮+伸缩拉杆携行, 箱盖展开作为操作台面 | 工程塑料(PP共聚物), 800×500×400mm以内, 硅橡胶密封条, 透气阀(防水透气膜) | ≤8kg (含衬垫) | 箱体自身为被动 结构件无需备件
+合计 | — | — | ≤24.7kg (含5.3kg余量) | 推荐备件总重 ≤10kg(独立箱)
+[/TABLE]
+    内存配置为32GB LPDDR5-6400或DDR5-4800，具体取决于主板平台。预算分配如下：OS（Ubuntu 22.04 LTS或OpenHarmony定制版）与系统服务预留8GB；态势显示与GIS地图缓存预留8GB，其中含离线地图当前视野切片，实际占用约2至4GB；4D时空占用栅格预留6GB，实际活跃体素数据量远不足100MB，之所以预留这么大，是因为通过mmap映射大块连续虚拟地址空间可以显著简化八叉树的内存管理，避免频繁的malloc/free调用，这笔浪费是有意为之的；消解器搜索空间临时数据预留10GB，搜索过程中同时进行的搜索不超过3路，每路搜索空间不足3GB，完成后立即释放。32GB的整体配置，在18个月后的货架市场上已属加固型便携机的标准配置，不引入额外的定制成本，这一判断在采购节奏上是成立的。
+监测对象 | 参数 | 绿色正常 | 黄色注意 | 红色告警 | 红色动作
+平台外部能源 | 剩余SOC | >30% | 15-30% | <15% | 界面提示建议更换电池包, 超级电容开始预充电备用
+平台总功耗 | 实时功耗 | <150W | 150-180W | >180W | 自动关闭非核心负载 (日志回放/地图预加载等)
+无人机电量 | 剩余SOC | >35% | 20-35% | <20% | 自动切换至返航通道规划, 暂停向该机分配新任务
+无人机返航 电量裕度 | SOC−返航 需求SOC | >15% | 5-15% | <5% | 向该机发送强制RTL指令, 操作员3s内可取消
+超级电容 | 当前充电 SOC | >90% | 70-90% | <70% | 禁止热插拔操作, 界面锁死请等待 超级电容充电完成
+发电机 (如接入) | 输出功率/ 燃油剩余 | 输出正常 燃油>30min | 输出波动 >±20% | 输出中断 或燃油<10min | 自动切换至电池供电, 界面告警发电机异常, 请检查燃油/维护
+[/TABLE]
+参数 | 主电池包 (LiFePO4基线) | 备用电池包 (LiFePO4基线) | Li-NMC轻量化 选项(主电池包)
+标称容量 | 3.0kWh | 2.5kWh | 3.0kWh
+标称电压 | 24VDC(8S LiFePO4) | 24VDC(8S LiFePO4) | 24VDC(7S Li-NMC)
+重量(含外壳+BMS) | 约18-22kg | 约15-18kg | 约12-15kg
+能量密度(电芯级) | 120-150Wh/kg | 120-150Wh/kg | 200-250Wh/kg
+外形尺寸(约) | 450×350×180mm | 400×300×150mm | 400×300×120mm
+200W满功率运行时间 | 约15h | 约12.5h | 约15h
+典型功耗(113W)运行时间 | 约26.5h | 约22h | 约26.5h
+循环寿命(至80%容量) | ≥2000次 | ≥2000次 | ≥500次
+热失控温度 | 约270°C | 约270°C | 约200°C
+防护等级 | IP65 | IP65 | IP65
+[/TABLE]
+组件 | 储能容量 | 供电时长 (200W负载) | 切换响应 | 在120h中的角色 | 重量
+超级电容缓冲 | 约4.3kJ(15F/24V) | 约10-21s | <100μs (电子开关) | 电池包热插拔切换瞬间 无缝接管-秒级缓冲 | 约0.5kg
+内置电池 | 约200Wh | 约60-80min (降级模式) | 自动切换 (电源管理MCU) | 系统启动/关闭和 意外断电时的过渡电源 | 约1.2-1.5kg
+外部主电池包 | 约3kWh | 约15h(满功率) 约26.5h(典型) | 操作员手动 热插拔 | 主力运行能源- 3kWh/200W=15h | 约18-22kg
+外部备用电池包 | 约2.5kWh | 约12.5h(满功率) 约22h(典型) | 操作员手动 热插拔 | 接续运行+主电池包 充电期间的替代能源 | 约15-18kg
+车辆电源 | 取决于车辆 燃油/蓄电池 | 不限 (车辆有燃油即持续) | 自动切换 (电压监测) | 在车辆可达时替代电池 或为电池充电 | 车载已有 不增加携行重
+便携发电机 | 5L油箱约17kWh (汽油热值) | 约10-15h/5L (200W负载下) | 手动启动 +接入AC-DC | 超长时间保障- 5L油箱+0.3-0.5L/h | 约12-18kg
+[/TABLE]
+   上述七层共同构成了从硬件底层到操作员界面的完整软件栈。大致可以这样划分：第（1）（2）层是平台依赖层，与具体硬件选型直接挂钩；第（3）（4）（5）层是系统核心层，与硬件解耦，承载的是纯算法与控制逻辑，也就是本项目交付的集中协同运动控制原型和通信链路原型的主体部分；第（6）（7）（8）层则是应用与辅助层，面向操作员的直接交互功能和研发支撑工具均在此层。核心层在18个月项目周期内享有最高开发优先级，应用层中部分非核心功能（如数据回放的事后分析模式）本就可以推迟至后续工程化阶段逐步完善，没有必要在原型阶段一并铺开。
+任务名称 | 优先级 (0=最高) | 调度周期 (ms) | 堆栈大小 (KB) | WCET (ms) | CPU占用 (%) | MPU分区
+飞控指令输出 (flight_ctrl) | 0 | 5 (tick同步) | 8 | ≤3.0 | 60% | 分区0 (飞控域, 不可侵犯)
+避障消解计算 (avoid_resolve) | 0 | 10 (事件触发 +周期兜底) | 12 | ≤8.0 | 80% | 分区1 (感知域, 只读共享)
+感知融合追踪 (fusion_track) | 1 | 20 (10Hz 感知帧率) | 16 | ≤15.0 | 75% | 分区1 (感知域)
+TDMA MAC协议栈 (tdma_mac) | 1 | 5 (时隙 边界对齐) | 6 | ≤2.0 | 40% | 分区2 (通信域)
+COFDM链路管理 (cofdm_mgr) | 2 | 100 (AMC 更新周期) | 4 | ≤5.0 | 5% | 分区2 (通信域)
+遥测上报 (telemetry_tx) | 2 | 100 (10Hz 遥测周期) | 4 | ≤2.0 | 2% | 分区2 (通信域)
+健康监测 (health_mon) | 3 | 1000 (1Hz 巡检) | 2 | ≤1.0 | 0.1% | 分区3 (监测域, 只读)
+日志记录 (log_writer) | 3 | 事件触发 (异步写入) | 8 | ≤5.0 | — | 分区3 (监测域)
+[/TABLE]
+设备类型 | HDI接口名称 | 函数签名 | 功能说明 | 调用者
+激光雷达 (LiDAR) | ILidarHdi::Open() | int32_t Open(const LidarConfig& cfg) | 初始化并启动扫描，返回设备句柄 | 感知融合 主线程
+ | ILidarHdi::ReadScan() | int32_t ReadScan(LidarScan* scan, int32_t timeout_ms) | 阻塞读取一帧点云(≤100ms超时) | 感知融合 主线程
+ | ILidarHdi::GetStatus() | int32_t GetStatus(LidarStatus* status) | 查询设备状态(温度/转速/故障码) | 健康监测 线程
+ | ILidarHdi::SetROI() | int32_t SetROI(float az_min, float az_max, float el_min, float el_max) | 设置扫描ROI(角度范围) | 感知融合 主线程
+ | ILidarHdi::Close() | int32_t Close(int32_t handle) | 停止扫描并释放资源 | 设备管理 服务
+ | (其余3个接口) | Suspend/Resume/GetCapability | 挂起扫描/恢复扫描/查询设备能力 | —
+毫米波雷达 (mmWave) | IRadarHdi::Open() | int32_t Open(const RadarConfig& cfg) | 初始化并开始目标检测 | 感知融合 主线程
+ | IRadarHdi::ReadTargets() | int32_t ReadTargets(RadarTarget* targets, int32_t max_n, int32_t timeout_ms) | 读取目标列表(最多N个) | 感知融合 主线程
+ | IRadarHdi::GetStatus() | int32_t GetStatus(RadarStatus* status) | 查询设备状态 | 健康监测 线程
+ | IRadarHdi::SetMode() | int32_t SetMode(RadarMode mode) | 切换工作模式(近距/远距) | 感知融合 主线程
+ | IRadarHdi::Close() | int32_t Close(int32_t handle) | 停止检测并释放资源 | 设备管理 服务
+ | (其余3个接口) | Suspend/Resume/GetCapability | 挂起/恢复/能力查询 | —
+[/TABLE]
+电源状态 | 计算单元TDP (W) | 通信基站功耗 (W) | 显示终端功耗 (W) | 总功耗 (W) | 触发条件 | 恢复条件
+S0 全功率 | 25 | 33 | 33 | ~100 | 外部电源正常 且SOC>20% | —
+S1 任务保持 | 15 | 25 | 15 | ~60 | 外部电源SOC ≤20% | SOC恢复 >30%
+S2 最小链路 | 12 | 8 | 5 | ~30 | 外部电源SOC ≤10%或仅剩 一块电池 | SOC恢复 >20%
+S3 临界保护 | 8 | 5 | 0(关闭) | ~15 | 超级电容 供电中 | 外部电源 恢复接入
+S4 安全关机 | 0 | 0 | 0 | ~0 | 超级电容SOC <10% | 人工重启
+[/TABLE]
+struct DroneState {
+    uint16_t drone_id;            // 设备唯一ID (注册时分配)
+    uint8_t  drone_type;          // 类型: 0=侦察 1=投送 2=中继 3=其他
+    // --- 位置与运动 (ENU坐标系, 单位: m, m/s, rad) ---
+    double   pos_x, pos_y, pos_z; // ENU位置 (WGS84投影至ENU)
+    double   vel_x, vel_y, vel_z; // ENU速度
+    double   roll, pitch, yaw;    // 姿态角 (欧拉角 RPY)
+    double   ang_vel_x, ang_vel_y, ang_vel_z; // 角速度
+    // --- 导航状态 ---
+    uint8_t  nav_status;          // 0=GNSS固定解 1=GNSS浮点解
+                                  // 2=视觉里程计 3=ESKF融合 4=惯性推测
+    float    nav_accuracy;        // 定位精度估计 (m, CEP)
+    float    heading_accuracy;    // 航向精度估计 (deg, 1σ)
+    // --- 能源 ---
+    uint8_t  battery_soc;         // 剩余电量百分比 (0-100%)
+    float    battery_voltage;     // 电池电压 (V)
+    float    current_draw;        // 当前电流 (A)
+    int16_t  est_remaining_s;     // 估计剩余飞行时间 (s)
+    // --- 飞行模式与任务 ---
+    uint8_t  flight_mode;         // 0=待命 1=自动任务 2=手动操控
+                                  // 3=RTL返航 4=降落 5=紧急
+    uint16_t current_mission_id;  // 当前执行的任务ID (0=无任务)
+    uint8_t  mission_status;      // 0=待执行 1=执行中 2=已完成 3=异常
+    // --- 健康与状态 ---
+    uint8_t  health_flags;        // bit0=飞控 bit1=感知 bit2=通信
+                                  // bit3=电源 bit4=执行机构 (1=正常 0=异常)
+    uint16_t fault_code;          // 详细故障码 (0=无故障)
+    // --- 链路 ---
+    int8_t   link_rssi;           // 接收信号强度 (dBm)
+    uint8_t  link_snr;            // 信噪比 (dB)
+    float    link_delay_ms;       // 端到端延迟 (ms)
+    // --- 时间戳 ---
+    uint64_t timestamp_ms;        // 消息生成时间 (系统时间, ms)
+};
+struct DroneCommand {
+    uint16_t drone_id;            // 目标无人机ID
+    uint8_t  cmd_type;            // 0=航点 1=速度 2=上传航线
+                                  // 3=起飞 4=降落 5=RTL 6=紧急悬停
+    uint8_t  priority;            // 0=紧急 1=高 2=常规 3=低
+    // --- 航点指令参数 (cmd_type=0) ---
+    double   wp_x, wp_y, wp_z;    // 目标航点 (ENU)
+    float    wp_speed;            // 巡航速度 (m/s)
+    float    wp_accept_radius;    // 到达判定半径 (m)
+    // --- 速度指令参数 (cmd_type=1) ---
+    double   vel_cmd_x, vel_cmd_y, vel_cmd_z; // 期望速度 (m/s)
+    float    vel_cmd_yaw;         // 期望航向角 (rad)
+    uint16_t vel_cmd_duration_ms; // 持续时长 (ms, 0=持续至新指令)
+    // --- 航线上传参数 (cmd_type=2) ---
+    uint8_t  wpt_count;           // 路径点数量 (≤50)
+    // 路径点数组通过可变长度字段附加在消息尾部
+    // --- 通用 ---
+    uint32_t cmd_id;              // 指令ID (递增, 用于ACK对账)
+    uint8_t  require_ack;         // 0=无需ACK 1=需ACK确认
+    uint64_t expire_ms;           // 指令过期时间 (超时未执行则丢弃)
+};
+struct DroneCapability {
+    uint16_t drone_id;            // 所属无人机ID
+    // --- 飞行性能 ---
+    float    max_speed;           // 最大平飞速度 (m/s)
+    float    max_climb_rate;      // 最大爬升率 (m/s)
+    float    max_altitude;        // 最大飞行高度 (m, 相对起飞点)
+    float    max_endurance_s;     // 最大续航时间 (s, 标准工况)
+    float    max_wind_resist;     // 最大抗风等级 (m/s)
+    // --- 载荷 ---
+    uint8_t  payload_type;        // 0=无载荷 1=可见光相机 2=红外
+                                  // 3=投送装置 4=通信中继 5=喊话器
+    float    payload_mass_kg;     // 当前载荷重量 (kg)
+    float    max_payload_kg;      // 最大载荷能力 (kg)
+    // --- 感知传感器 ---
+    uint8_t  has_lidar;           // 0/1 是否配备激光雷达
+    uint8_t  has_mmw_radar;       // 0/1 是否配备毫米波雷达
+    uint8_t  has_rgb_cam;         // 0/1 是否配备RGB相机
+    uint8_t  has_ir_cam;          // 0/1 是否配备红外相机
+    float    lidar_range_m;       // 激光雷达有效量程 (m)
+    float    lidar_fov_deg;       // 激光雷达视场角 (deg)
+    // --- 控制能力 ---
+    uint8_t  supports_vel_ctrl;   // 0/1 是否支持速度控制模式
+    uint8_t  supports_pos_ctrl;   // 0/1 是否支持位置控制模式
+    uint8_t  supports_mission;    // 0/1 是否支持航线上传
+    uint8_t  supports_rtl;        // 0/1 是否支持RTL返航
+    // --- 通信 ---
+    uint8_t  protocol_type;       // 0=MAVLink 1=DJI SDK 2=私有A
+                                  // 3=私有B 4=透明转发
+    uint8_t  max_tx_power_dbm;    // 最大发射功率 (dBm)
+    uint8_t  supported_bands;     // bit0=1.4G bit1=2.4G bit2=5.8G
+};
+struct PerceptionMsg {
+    uint16_t drone_id;            // 上报无人机ID
+    uint64_t timestamp_ms;        // 感知数据时间戳
+    uint32_t frame_id;            // 感知帧序号 (递增)
+    // --- 障碍物列表 ---
+    uint8_t  obstacle_count;      // 障碍物数量 (0-50)
+    // 障碍物数组 (每个障碍物:)
+    //   float center_x, center_y, center_z;  // OBB中心 (ENU)
+    //   float size_x, size_y, size_z;        // OBB尺寸 (m)
+    //   float vel_x, vel_y, vel_z;           // 速度 (m/s)
+    //   uint8_t obs_class;                   // 0=建筑 1=树木 2=线缆
+    //                                         // 3=车辆 4=人员 5=其他
+    //   float confidence;                    // 检测置信度 (0.0-1.0)
+    // --- 局部栅格地图 (可选, 仅在有显著变化时包含) ---
+    uint8_t  has_local_map;       // 0/1 是否包含局部地图
+    float    local_map[20][20];   // 20×20栅格 (1m分辨率),
+                                  // 值=占据概率 (0.0-1.0, 255=未知)
+    double   map_origin_x, map_origin_y; // 栅格地图原点 (ENU)
+    // --- 目标检测结果 (可选) ---
+    uint8_t  target_count;        // 检测到的目标数 (0-10)
+    // 目标数组 (每个目标:)
+    //   uint8_t target_class;               // 目标类别
+    //   float target_x, target_y, target_z; // 位置
+    //   float target_confidence;            // 置信度
+};
+struct HeartbeatMsg {
+    uint16_t drone_id;            // 无人机ID
+    uint8_t  online_status;       // 0=离线 1=在线 2=降级 3=紧急
+    uint8_t  flight_mode;         // 飞行模式 (同DroneState)
+    uint8_t  battery_soc;         // 电量百分比 (快速摘要)
+    uint8_t  health_summary;      // 0=全正常 1=轻微异常 2=严重异常
+    uint8_t  link_quality;        // 0=优 1=良 2=中 3=差 4=断
+    float    link_delay_ms;       // 当前RTT延迟 (ms)
+    uint8_t  packet_loss_pct;     // 丢包率 (%, 过去10s窗口)
+    uint16_t fault_code;          // 当前故障码 (0=无故障)
+    uint64_t timestamp_ms;        // 时间戳
+};
+#pragma once
+#include <cstdint>
+#include <array>
+#include <string>
+
+constexpr uint16_t TDMA_FRAME_MS    = 30;    // 帧周期
+constexpr uint16_t TDMA_SLOTS       = 36;    // 时隙数
+constexpr uint16_t TDMA_GUARD_US    = 50;    // 保护间隔 (us)
+constexpr uint16_t TDMA_SLOT_US     = (TDMA_FRAME_MS * 1000) / TDMA_SLOTS;  // 每时隙约833us
+
+enum class SlotDirection : uint8_t {
+    UPLINK   = 0,  // 无人机 → 基站
+    DOWNLINK = 1,  // 基站 → 无人机
+    GUARD    = 2   // 保护时隙
+};
+
+struct SlotAllocation {
+    uint16_t      node_id;        // 占用节点ID (0=基站, 1-30=无人机)
+    SlotDirection direction;
+    uint8_t       priority;       // 0=紧急 1=高 2=常规 (继承自数据QoS)
+};
+
+struct TdmaFrame {
+    uint32_t                          frame_id;    // 帧序号 (递增)
+    uint64_t                          start_us;    // 帧起始时刻 (系统时间us)
+    std::array<SlotAllocation, TDMA_SLOTS> slots;  // 时隙分配表
+};
+#include tdma_frame.h
+#include <vector>
+#include <algorithm>
+#include <cmath>
+
+struct NodeDemand {
+    uint16_t node_id;
+    SlotDirection dir;
+    float    rate_kbps;   // 需求速率
+    uint8_t  priority;
+    uint16_t allocated = 0;  // 已分配时隙数
+};
+
+// 单时隙容量: 833us × 200kbps(GFSK) ≈ 167 bits ≈ 21 bytes/时隙
+constexpr float SLOT_CAPACITY_KBPS = (21.0f * 8.0f) / (TDMA_FRAME_MS / 1000.0f);  // ≈5.6kbps
+
+TdmaFrame greedySlotAllocation(const std::vector<NodeDemand>& demands) {
+    TdmaFrame frame{};
+    frame.frame_id = 0;  // 由上层维护
+
+    // 复制并按优先级+速率需求降序
+    auto queue = demands;
+    std::sort(queue.begin(), queue.end(),
+        [](const NodeDemand& a, const NodeDemand& b) {
+            if (a.priority != b.priority) return a.priority < b.priority;
+            return a.rate_kbps > b.rate_kbps;
+        });
+
+    uint16_t slot_idx = 0;
+    // 前两个时隙固定为保护时隙 (帧边界)
+    frame.slots[0].direction = SlotDirection::GUARD;
+    frame.slots[TDMA_SLOTS-1].direction = SlotDirection::GUARD;
+
+    // 贪心分配: 为每个节点分配足够满足其速率需求的时隙数
+    for (auto& dm : queue) {
+        uint16_t needed = static_cast<uint16_t>(
+            std::ceil(dm.rate_kbps / SLOT_CAPACITY_KBPS));
+        needed = std::max(needed, uint16_t(1));  // 至少1个时隙
+
+        for (uint16_t s = 1; s < TDMA_SLOTS - 1 && dm.allocated < needed; ++s) {
+            if (frame.slots[s].node_id == 0) {  // 空闲时隙
+                frame.slots[s].node_id    = dm.node_id;
+                frame.slots[s].direction  = dm.dir;
+                frame.slots[s].priority   = dm.priority;
+                dm.allocated++;
+            }
+        }
+    }
+    return frame;
+}
+
+// 估算节点N的平均时隙等待延迟 (ms)
+float estimateWaitDelay(const TdmaFrame& frame, uint16_t node_id) {
+    // 统计该节点的时隙间隙，取平均间隔 / 2 作为期望等待时间
+    // (假设数据包到达时间在帧内均匀分布)
+    float avg_interval_ms = static_cast<float>(TDMA_FRAME_MS) / TDMA_SLOTS;
+    return avg_interval_ms * 0.5f;  // ~0.42ms for 30ms/36slots
+}
+#pragma once
+#include <cstdint>
+#include <array>
+
+enum class AmcLevel : uint8_t {
+    BPSK  = 0,   // SNR≥3dB,  吞吐量2Mbps,  BER<1e-6
+    QPSK  = 1,   // SNR≥7dB,  吞吐量4Mbps
+    QAM16 = 2,   // SNR≥12dB, 吞吐量8Mbps
+    QAM64 = 3    // SNR≥18dB, 吞吐量12Mbps (需要最高SNR)
+};
+
+struct AmcState {
+    AmcLevel level;
+    float    snr_db;          // 当前估计SNR
+    float    throughput_mbps;  // 物理层吞吐量
+    float    target_ber;      // 目标误码率
+};
+
+// cofdm_amc.cpp — AMC切换逻辑
+#include cofdm_amc.h
+#include <algorithm>
+
+constexpr float AMC_THRESHOLDS[]  = {3.0f, 7.0f, 12.0f, 18.0f};  // SNR门限 (dB)
+constexpr float AMC_HYSTERESIS_DB = 1.5f;   // 迟滞 (防止来回切换)
+constexpr float AMC_THROUGHPUT[]  = {2.0f, 4.0f, 8.0f, 12.0f}; // Mbps
+
+class CofdmAmcController {
+public:
+    explicit CofdmAmcController(float hysteresis_db = AMC_HYSTERESIS_DB)
+        : hysteresis_db_(hysteresis_db) {}
+
+    // 基于当前SNR估计选择最优AMC档位 (每帧边界调用一次)
+    AmcState selectLevel(float estimated_snr_db) {
+        AmcLevel new_level = current_.level;
+        float best_snr = estimated_snr_db;
+
+        // 尝试升档 (当前档位SNR超过上一档门限+迟滞)
+        if (static_cast<int>(current_.level) < 3) {
+            float next_thresh = AMC_THRESHOLDS[static_cast<int>(current_.level) + 1];
+            if (best_snr > next_thresh + hysteresis_db_) {
+                new_level = static_cast<AmcLevel>(static_cast<int>(current_.level) + 1);
+            }
+        }
+        // 尝试降档 (当前档位SNR低于当前档门限-迟滞)
+        if (static_cast<int>(current_.level) > 0) {
+            float curr_thresh = AMC_THRESHOLDS[static_cast<int>(current_.level)];
+            if (best_snr < curr_thresh - hysteresis_db_) {
+                new_level = static_cast<AmcLevel>(static_cast<int>(current_.level) - 1);
+            }
+        }
+
+        current_.level            = new_level;
+        current_.snr_db           = best_snr;
+        current_.throughput_mbps  = AMC_THROUGHPUT[static_cast<int>(new_level)];
+        current_.target_ber       = (new_level == AmcLevel::BPSK) ? 1e-6f : 1e-5f;
+        return current_;
+    }
+
+    // 理论BER估计 (AWGN信道, QPSK/QAM Gray映射, 简化公式)
+    static float estimateBerAwgn(float snr_db, AmcLevel level) {
+        float snr_linear = std::pow(10.0f, snr_db / 10.0f);
+        int M = 2 << static_cast<int>(level);  // 2,4,16,64
+        // 近似: Q(sqrt(3*SNR/(M-1))) * 4*(1-1/sqrt(M))/log2(M)
+        float arg = std::sqrt(3.0f * snr_linear / (M - 1));
+        float q_val = 0.5f * std::erfc(arg / std::sqrt(2.0f));
+        return q_val * (4.0f * (1.0f - 1.0f / std::sqrt(M))) / std::log2(M);
+    }
+
+private:
+    float    hysteresis_db_;
+    AmcState current_{AmcLevel::BPSK, 20.0f, 2.0f, 1e-6f};
+};
+#pragma once
+#include <cstdint>
+#include <vector>
+#include <unordered_map>
+#include <unordered_set>
+#include <array>
+
+constexpr float   GRID_RES_M      = 1.0f;    // 空间分辨率
+constexpr int64_t GRID_TIME_STEP  = 100;      // 时间分辨率 (ms)
+constexpr int     GRID_MAX_DEPTH  = 6;        // 八叉树最大深度
+
+// 4D体素键: (ix, iy, iz, it)
+using VoxelKey = std::tuple<int32_t, int32_t, int32_t, int64_t>;
+
+struct VoxelKeyHash {
+    size_t operator()(const VoxelKey& k) const {
+        auto [x, y, z, t] = k;
+        return ((size_t)x * 73856093) ^ ((size_t)y * 19349663)
+             ^ ((size_t)z * 83492791) ^ ((size_t)t * 39916801);
+    }
+};
+
+// 体素数据: 占用该体素的无人机ID集合
+using VoxelOccupancy = std::unordered_set<uint16_t>;
+
+class Grid4D {
+public:
+    explicit Grid4D(float res_m = GRID_RES_M, int64_t time_step_ms = GRID_TIME_STEP)
+        : res_m_(res_m), time_step_ms_(time_step_ms) {}
+
+    // 插入一条轨迹的AABB占用 (沿轨迹膨胀安全间隔+不确定性)
+    void insertTrajectory(uint16_t drone_id,
+                          const std::vector<std::array<float,3>>& positions,
+                          const std::vector<int64_t>& timestamps_ms,
+                          const std::vector<float>& sigmas,
+                          float safety_xy, float safety_z);
+
+    // 移除一条旧的轨迹占用 (用于轨迹更新)
+    void removeTrajectory(uint16_t drone_id,
+                          const std::vector<std::array<float,3>>& positions,
+                          const std::vector<int64_t>& timestamps_ms);
+
+    // 查询两架无人机是否存在体素占用交集 (冲突初筛)
+    bool hasVoxelOverlap(uint16_t id_a, uint16_t id_b) const;
+
+    // 获取由指定无人机占用的全部体素
+    std::vector<VoxelKey> getOccupiedVoxels(uint16_t drone_id) const;
+
+    // 统计信息
+    size_t totalVoxels() const { return grid_.size(); }
+    size_t totalOccupancies() const;
+
+private:
+    VoxelKey worldToVoxel(float x, float y, float z, int64_t t_ms) const {
+        int32_t ix = static_cast<int32_t>(std::floor(x / res_m_));
+        int32_t iy = static_cast<int32_t>(std::floor(y / res_m_));
+        int32_t iz = static_cast<int32_t>(std::floor(z / res_m_));
+        int64_t it = t_ms / time_step_ms_;
+        return {ix, iy, iz, it};
+    }
+
+    float   res_m_;
+    int64_t time_step_ms_;
+    std::unordered_map<VoxelKey, VoxelOccupancy, VoxelKeyHash> grid_;
+};
+#include grid_4d.h
+#include <omp.h>
+#include <vector>
+#include <algorithm>
+
+struct ConflictResult {
+    uint16_t drone_a;
+    uint16_t drone_b;
+    int64_t  conflict_time_ms;    // 冲突时间
+    float    closest_dist_m;       // 最接近距离
+    int      level;               // 0=无 1=潜在(预测) 2=确认
+};
+
+// 检测所有在线无人机对之间的冲突 (OpenMP并行遍历)
+std::vector<ConflictResult> detectAllConflicts(
+    const Grid4D& grid,
+    const std::vector<uint16_t>& online_drone_ids,
+    float safety_xy, float safety_z)
+{
+    const size_t N = online_drone_ids.size();
+    const size_t num_pairs = N * (N - 1) / 2;
+
+    // 预构建机对列表 (便于OpenMP并行)
+    std::vector<std::pair<uint16_t, uint16_t>> pairs;
+    pairs.reserve(num_pairs);
+    for (size_t i = 0; i < N; ++i) {
+        for (size_t j = i + 1; j < N; ++j) {
+            pairs.emplace_back(online_drone_ids[i], online_drone_ids[j]);
+        }
+    }
+
+    std::vector<ConflictResult> results(pairs.size());
+
+    // OpenMP并行: 每对独立检测, 无数据依赖
+    #pragma omp parallel for schedule(dynamic, 8)
+    for (size_t k = 0; k < pairs.size(); ++k) {
+        auto [ida, idb] = pairs[k];
+        results[k].drone_a = ida;
+        results[k].drone_b = idb;
+        results[k].level   = 0;
+
+        // 快速初筛: 两机是否有体素占用交集?
+        if (!grid.hasVoxelOverlap(ida, idb)) {
+            continue;  // 无交集 → 无冲突
+        }
+
+        // 详细检测: 获取两机的体素占用列表并找时间重叠
+        auto vox_a = grid.getOccupiedVoxels(ida);
+        auto vox_b = grid.getOccupiedVoxels(idb);
+
+        // 找到时间维度重叠的体素对, 计算最接近空间距离
+        float min_dist = std::numeric_limits<float>::max();
+        int64_t conflict_t = 0;
+
+        for (const auto& [ax, ay, az, at] : vox_a) {
+            for (const auto& [bx, by, bz, bt] : vox_b) {
+                if (at != bt) continue;  // 不同时间步, 不可能冲突
+
+                // 体素中心距离 (近似, 实际应通过轨迹插值)
+                float dx = (ax - bx) * GRID_RES_M;
+                float dy = (ay - by) * GRID_RES_M;
+                float dz = (az - bz) * GRID_RES_M;
+                float d  = std::sqrt(dx*dx + dy*dy + dz*dz);
+
+                if (d < min_dist) {
+                    min_dist  = d;
+                    conflict_t = at * GRID_TIME_STEP;
+                }
+            }
+        }
+
+        // 判定冲突等级
+        if (min_dist < std::numeric_limits<float>::max()) {
+            float sep = std::min(safety_xy, safety_z);
+            results[k].closest_dist_m    = min_dist;
+            results[k].conflict_time_ms  = conflict_t;
+            results[k].level = (min_dist < sep) ? 2 : 1;  // 确认/潜在
+        }
+    }
+
+    // 过滤: 仅保留有冲突的结果
+    std::vector<ConflictResult> filtered;
+    filtered.reserve(results.size());
+    for (const auto& r : results) {
+        if (r.level > 0) filtered.push_back(r);
+    }
+    return filtered;
+}
+#include <vector>
+#include <array>
+#include <limits>
+
+enum class ResolvePrimitive {
+    STOP = 0,       // 悬停等待 (零速度指令)
+    REROUTE = 1,    // 路径重规划
+    ALTITUDE = 2    // 高度层调整 (上升/下降至另一高度层)
+};
+
+struct ResolveCandidate {
+    uint16_t          drone_id;
+    ResolvePrimitive  primitive;
+    std::vector<std::array<float,3>> new_waypoints;  // 新路径点序列
+    float             cost_path;      // 路径代价 (额外飞行距离)
+    float             cost_delay;     // 时间延迟代价
+    float             cost_energy;    // 能耗代价
+    float             safety_gain;    // 安全收益 (负成本, 越大越好)
+    float             total_cost;     // 加权总成本
+};
+
+// 生成三个消解候选方案 (每个原语一个方案)
+std::vector<ResolveCandidate> generateCandidates(
+    const ConflictResult& conflict,
+    const Grid4D& grid,
+    const std::vector<std::array<float,3>>& traj_a,  // 无人机A的参考轨迹
+    const std::vector<std::array<float,3>>& traj_b)  // 无人机B的参考轨迹
+{
+    std::vector<ResolveCandidate> candidates;
+
+    // 候选1: STOP — 无人机A在冲突点前方悬停
+    {
+        ResolveCandidate c;
+        c.drone_id   = conflict.drone_a;
+        c.primitive  = ResolvePrimitive::STOP;
+        // 路径: 正常飞行至冲突前2s → 悬停5s → 继续
+        c.cost_path    = 0.0f;    // 无额外距离
+        c.cost_delay   = 5.0f;     // 5s等待
+        c.cost_energy  = 5.0f * 200.0f / 3600.0f; // 悬停功耗率
+        c.safety_gain  = 1.0f;     // 最高安全收益 (完全避让)
+        candidates.push_back(c);
+    }
+
+    // 候选2: REROUTE — 搜索新路径绕开冲突体素
+    {
+        ResolveCandidate c;
+        c.drone_id   = conflict.drone_a;
+        c.primitive  = ResolvePrimitive::REROUTE;
+        // 在自由体素图上搜索 (start=当前位置, goal=原航线终点)
+        // (实现省略 — 标准栅格, 代价=g+h, h=欧氏距离到目标)
+        auto new_path = astarSearch(
+            traj_a.front(),        // start pos
+            traj_a.back(),         // goal pos
+            grid,                  // 4D占用栅格 (障碍体素=被其他机占用)
+            conflict.drone_a
+        );
+        c.new_waypoints = new_path;
+        c.cost_path    = pathLength(new_path) - pathLength(traj_a);
+        c.cost_delay   = c.cost_path / 10.0f;  // 按10m/s巡航速度估算
+        c.cost_energy  = c.cost_path * 1.5f;    // 能耗因子
+        c.safety_gain  = 0.8f;
+        candidates.push_back(c);
+    }
+
+    // 候选3: ALTITUDE — 将A机升高5m (高度层分离)
+    {
+        ResolveCandidate c;
+        c.drone_id   = conflict.drone_a;
+        c.primitive  = ResolvePrimitive::ALTITUDE;
+        // 将整个航线的Z轴偏移+5m
+        auto shifted_traj = traj_a;
+        for (auto& wp : shifted_traj) wp[2] += 5.0f;
+        c.new_waypoints = shifted_traj;
+        c.cost_path    = 0.0f;
+        c.cost_delay   = 0.0f;
+        c.cost_energy  = 5.0f * 20.0f / 3600.0f;  // 爬升5m额外能耗
+        c.safety_gain  = 0.7f;
+        candidates.push_back(c);
+    }
+
+    return candidates;
+}
+
+// 成本评估: 加权总分 (权重可配置, 以下是默认值)
+float evaluateCost(const ResolveCandidate& c,
+                   float w_path=1.0f, float w_delay=1.5f,
+                   float w_energy=0.5f, float w_safety=-2.0f) {
+    return w_path * c.cost_path
+         + w_delay * c.cost_delay
+         + w_energy * c.cost_energy
+         + w_safety * c.safety_gain;  // 安全收益为负成本
+}
+
+// 安全过滤层: 4条硬约束规则 (纯C逻辑, <2KB代码)
+struct SafetyFilter {
+    // 规则1: 方案是否导致无人机进入禁飞区?
+    static bool checkNoFlyZone(const ResolveCandidate& c,
+                               const std::vector<std::array<float,2>>& no_fly_zones) {
+        for (const auto& wp : c.new_waypoints) {
+            if (pointInPolygon(wp[0], wp[1], no_fly_zones)) return false;
+        }
+        return true;
+    }
+    // 规则2: 方案是否产生新的冲突?
+    // 规则3: 方案是否超出无人机能力边界 (速度/高度/续航)?
+    // 规则4: 方案是否违反最低电量约束?
+    // (实现省略, 均为简单的阈值比较或空间查询)
+};
+原型模块 | 开发语言/框架 | 核心功能 | 输入/输出 | 代码规模 (估) | 交付
+TDMA时隙 分配模拟器 | C++17 + ROS 2 | 30机时隙贪心分配, 时隙利用率统计, 等待延迟统计 | 入: 节点列表+速率需求 出: 时隙分配表+统计CSV | 约800行 C++ | 是 (通信链路)
+COFDM链路 质量模拟器 | C++17 + ROS 2 | AMC档位切换逻辑, AWGN信道BER估算, 吞吐量统计 | 入: SNR时间序列 出: 档位序列+吞吐量CSV | 约500行 C++ | 是 (通信链路)
+4D栅格+ 冲突检测 | C++17 + ROS 2 | 4D体素管理, 八叉树索引, 轨迹AABB相交检测, OpenMP并行遍历机对 | 入: 30机轨迹+空域配置 出: 冲突列表+统计 | 约1500行 C++ | 是 (协同控制)
+冲突消解器 | C++17 + ROS 2 | 三原语候选方案生成, 成本函数评估, 安全过滤层验证 | 入: 冲突对+栅格 出: 消解方案+新轨迹 | 约1200行 C++ | 是 (协同控制)
+MAVLink 适配器 | C++17 + ROS 2 | 标准消息↔MAVLink v2 双向转换, 能力提取 | 入: MAVLink字节流 出: DroneState/Capability | 约600行 C++ | 是 (异构接入)
+协议指纹 引擎 | C++17 + Python (scapy) | 帧捕获→特征提取→ 模板匹配, 置信度输出 | 入: 报文pcap文件 出: 协议类型+置信度 | 约500行 C++ +300行 Python | 是 (异构接入)
+[/TABLE]
+#pragma once
+#include <cstdint>
+#include <vector>
+#include <string>
+#include <memory>
+
+// --- 统一的无人机状态/指令/能力数据模型 (第10.2节定义) ---
+struct DroneState {
+    uint16_t drone_id;
+    double pos[3], vel[3], att[3];    // ENU位置/速度/姿态
+    uint8_t battery_soc, flight_mode, health_flags;
+    uint16_t fault_code;
+    int8_t  link_rssi;
+    uint64_t timestamp_ms;
+};
+
+struct DroneCommand {
+    uint16_t drone_id;
+    uint8_t  cmd_type;     // 0=航点 1=速度 2=航线 3=起飞 4=降落 5=RTL
+    double   wp[3];        // 航点参数
+    float    speed;
+    uint32_t cmd_id;
+};
+
+struct DroneCapability {
+    uint16_t drone_id;
+    float    max_speed, max_altitude, max_endurance_s;
+    uint8_t  payload_type, has_lidar, has_mmw, has_rgb, has_ir;
+    uint8_t  supports_vel_ctrl, supports_pos_ctrl, supports_mission;
+    uint8_t  protocol_type;  // 0=MAVLink 1=DJI_MSDK 2=Private_A ...
+};
+
+// 统一适配器接口 (策略模式基类)
+class IProtocolAdapter {
+public:
+    virtual ~IProtocolAdapter() = default;
+
+    // 协议名称
+    virtual std::string protocolName() const = 0;
+
+    // 上行: 标准指令 → 协议特定字节流
+    virtual std::vector<uint8_t> encodeCommand(const DroneCommand& cmd) = 0;
+
+    // 下行解析: 协议特定字节流 → 标准状态
+    virtual DroneState decodeState(const std::vector<uint8_t>& raw) = 0;
+
+    // 能力提取: 协议特定心跳/参数 → DroneCapability
+    virtual DroneCapability extractCapability(const std::vector<uint8_t>& raw) = 0;
+
+    // 心跳维持: 生成协议特定的心跳报文
+    virtual std::vector<uint8_t> generateHeartbeat() = 0;
+
+    // 协议自检: 判断一段原始字节流是否可能属于此协议
+    virtual bool isLikelyThisProtocol(const std::vector<uint8_t>& sample) = 0;
+};
+
+// 适配器工厂: 根据协议类型字符串创建对应适配器实例
+std::unique_ptr<IProtocolAdapter> createAdapter(const std::string& protocol_name);
+#include protocol_adapter.h
+#include <mavlink/v2.0/common/mavlink.h>
+#include <cstring>
+
+class MavlinkAdapter : public IProtocolAdapter {
+public:
+    std::string protocolName() const override { return MAVLink_v2; }
+
+    // 标准指令 → MAVLink消息 (示例: 航点指令 → MISSION_ITEM_INT)
+    std::vector<uint8_t> encodeCommand(const DroneCommand& cmd) override {
+        mavlink_message_t msg;
+        uint8_t buf[MAVLINK_MAX_PACKET_LEN];
+
+        if (cmd.cmd_type == 0) {  // 航点指令
+            mavlink_msg_mission_item_int_pack(
+                1, 0, &msg,         // sysid=1, compid=0 (地面站)
+                cmd.drone_id, 0,    // target_system, target_component
+                0,                  // seq (由无人机维护)
+                MAV_FRAME_GLOBAL_RELATIVE_ALT,
+                MAV_CMD_NAV_WAYPOINT,  // 航点命令
+                0, 0,               // current, autocontinue
+                0.0f, 0.0f, 0.0f,   // param1-3 (未使用)
+                static_cast<float>(cmd.wp[0] * 1e7),  // x (1e7度 → int32)
+                static_cast<float>(cmd.wp[1] * 1e7),  // y
+                cmd.wp[2]            // z (相对高度, m)
+            );
+        } else if (cmd.cmd_type == 5) {  // RTL返航
+            mavlink_msg_command_long_pack(
+                1, 0, &msg, cmd.drone_id, 0,
+                MAV_CMD_NAV_RETURN_TO_LAUNCH, 0,
+                0, 0, 0, 0, 0, 0, 0
+            );
+        }
+        // ... 其他指令类型
+
+        uint16_t len = mavlink_msg_to_send_buffer(buf, &msg);
+        return std::vector<uint8_t>(buf, buf + len);
+    }
+
+    // MAVLink消息 → 标准DroneState (多消息聚合)
+    DroneState decodeState(const std::vector<uint8_t>& raw) override {
+        mavlink_message_t msg;
+        mavlink_status_t status;
+
+        // 解析MAVLink帧
+        for (size_t i = 0; i < raw.size(); ++i) {
+            if (mavlink_parse_char(MAVLINK_COMM_0, raw[i], &msg, &status)) {
+                return updateStateFromMsg(msg);
+            }
+        }
+        return current_state_;  // 返回最近一次完整状态
+    }
+
+    // 从MAVLink心跳+版本消息提取能力声明
+    DroneCapability extractCapability(const std::vector<uint8_t>& raw) override {
+        DroneCapability cap{};
+        // MAVLink HEARTBEAT → type/autopilot/base_mode
+        // AUTOPILOT_VERSION → 飞控能力标志位
+        // (简化实现: 假设为通用MAVLink无人机, 填充默认能力)
+        cap.max_speed       = 15.0f;
+        cap.max_altitude    = 500.0f;
+        cap.max_endurance_s = 1800.0f;
+        cap.supports_vel_ctrl  = 1;
+        cap.supports_pos_ctrl  = 1;
+        cap.supports_mission   = 1;
+        cap.protocol_type      = 0;  // MAVLink
+        return cap;
+    }
+
+    bool isLikelyThisProtocol(const std::vector<uint8_t>& sample) override {
+        // MAVLink v2帧头: 0xFD
+        return !sample.empty() && sample[0] == 0xFD;
+    }
+
+    std::vector<uint8_t> generateHeartbeat() override {
+        mavlink_message_t msg;
+        uint8_t buf[MAVLINK_MAX_PACKET_LEN];
+        mavlink_msg_heartbeat_pack(
+            1, MAV_COMP_ID_MISSIONPLANNER, &msg,
+            MAV_TYPE_GCS, MAV_AUTOPILOT_INVALID,
+            MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, 0,
+            MAV_STATE_ACTIVE
+        );
+        uint16_t len = mavlink_msg_to_send_buffer(buf, &msg);
+        return std::vector<uint8_t>(buf, buf + len);
+    }
+
+private:
+    DroneState current_state_;
+
+    DroneState updateStateFromMsg(const mavlink_message_t& msg) {
+        switch (msg.msgid) {
+            case MAVLINK_MSG_ID_GLOBAL_POSITION_INT: {
+                mavlink_global_position_int_t pos;
+                mavlink_msg_global_position_int_decode(&msg, &pos);
+                current_state_.pos[0] = pos.lat / 1e7;   // lat (deg)
+                current_state_.pos[1] = pos.lon / 1e7;   // lon (deg)
+                current_state_.pos[2] = pos.relative_alt / 1000.0f; // mm→m
+                break;
+            }
+            case MAVLINK_MSG_ID_ATTITUDE: {
+                mavlink_attitude_t att;
+                mavlink_msg_attitude_decode(&msg, &att);
+                current_state_.att[0] = att.roll;
+                current_state_.att[1] = att.pitch;
+                current_state_.att[2] = att.yaw;
+                break;
+            }
+            case MAVLINK_MSG_ID_SYS_STATUS: {
+                mavlink_sys_status_t sys;
+                mavlink_msg_sys_status_decode(&msg, &sys);
+                current_state_.battery_soc = sys.battery_remaining;
+                break;
+            }
+            // ... 其他消息类型
+        }
+        return current_state_;
+    }
+};
+#include <vector>
+#include <cstdint>
+#include <map>
+#include <algorithm>
+#include <string>
+
+struct FingerprintTemplate {
+    std::string              name;             // 协议名
+    std::vector<uint8_t>     header_bytes;     // 候选帧头字节
+    std::pair<int,int>       len_range;        // (min, max) 帧长范围
+    int                      hb_interval_ms;   // 典型心跳间隔
+    std::vector<std::pair<int,uint8_t>> sig_bytes; // (偏移, 特征字节)
+};
+
+// 预置协议模板库 (与第7章模板库一致)
+static const std::vector<FingerprintTemplate> TEMPLATES = {
+    {MAVLink_v2, {0xFD}, {11, 279}, 1000, {{0, 0xFD}}},
+    {DJI_MSDK,   {0x55, 0xAA}, {10, 150}, 500, {{0, 0x55}, {1, 0xAA}}},
+    {Private_A,  {0x7E, 0x8B}, {16, 64}, 2000, {{0, 0x7E}}},
+    {Private_B,  {0xA5}, {24, 128}, 800, {{0, 0xA5}}},
+};
+
+struct FrameFeatures {
+    std::map<uint8_t, int> header_counts;  // 帧头字节→出现次数
+    int len_min, len_max, len_median;
+    int est_hb_ms;        // 估计心跳间隔
+    int frame_count;
+};
+
+// 从报文序列提取特征 (≥10帧)
+FrameFeatures extractFeatures(const std::vector<std::vector<uint8_t>>& frames,
+                               const std::vector<int64_t>& timestamps_ms) {
+    FrameFeatures feat{};
+    feat.frame_count = frames.size();
+
+    std::vector<int> lengths, intervals;
+    // 帧头统计 & 帧长收集
+    for (const auto& f : frames) {
+        if (!f.empty()) feat.header_counts[f[0]]++;
+        lengths.push_back(static_cast<int>(f.size()));
+    }
+    std::sort(lengths.begin(), lengths.end());
+    feat.len_min    = lengths.front();
+    feat.len_max    = lengths.back();
+    feat.len_median = lengths[lengths.size() / 2];
+
+    // 心跳间隔估计: 取最常见的报文间隔
+    for (size_t i = 1; i < timestamps_ms.size(); ++i) {
+        int dt = static_cast<int>(timestamps_ms[i] - timestamps_ms[i-1]);
+        if (dt > 200 && dt < 5000) intervals.push_back(dt);
+    }
+    if (!intervals.empty()) {
+        std::sort(intervals.begin(), intervals.end());
+        feat.est_hb_ms = intervals[intervals.size() / 2];
+    }
+    return feat;
+}
+
+// 模板匹配: 计算特征与每个模板的匹配得分
+std::pair<std::string, float> matchTemplate(const FrameFeatures& feat) {
+    std::string best_name = Unknown;
+    float       best_score = 0.0f;
+
+    for (const auto& tmpl : TEMPLATES) {
+        float score = 0.0f;
+
+        // 帧头匹配 (+0.4)
+        for (auto hb : tmpl.header_bytes) {
+            if (feat.header_counts.count(hb)) {
+                score += 0.4f;
+                break;
+            }
+        }
+        // 帧长范围匹配 (+0.3)
+        if (feat.len_median >= tmpl.len_range.first
+            && feat.len_median <= tmpl.len_range.second) {
+            score += 0.3f;
+        }
+        // 心跳间隔匹配 (+0.2, 容差<20%)
+        if (feat.est_hb_ms > 0) {
+            float err = std::abs(feat.est_hb_ms - tmpl.hb_interval_ms)
+                        / static_cast<float>(tmpl.hb_interval_ms);
+            if (err < 0.2f) score += 0.2f;
+            else if (err < 0.5f) score += 0.1f;
+        }
+
+        if (score > best_score) {
+            best_score = score;
+            best_name  = tmpl.name;
+        }
+    }
+
+    if (best_score < 0.5f) best_name = Unknown;
+    return {best_name, std::min(best_score, 0.95f)};
+}
+文件名 | 验证目标 | 核心算法 | 输入数据 | 输出产物 | 代码行数 (估)
+obstacle_ fusion_demo.py | 多源感知融合 →障碍物列表 | Patchwork++地面分割, DBSCAN聚类, PCA OBB拟合, 置信度加权融合 | 激光雷达点云NPZ+ 毫米波目标CSV+ RGB图像JPEG | 障碍物CSV+ OBB可视化PNG | 约400行 Python
+conflict_ detection_4d.py | 4D栅格构建+ 轨迹冲突检测 | 4D体素索引, Ray-AABB相交检测, 不确定性传播 | 30机轨迹CSV | 冲突事件CSV+ 轨迹可视化PNG (2D+3D) | 约500行 Python
+drone_registry_ gateway.py | 异构机注册+ 协议识别 | 协议指纹规则匹配, 注册握手状态机, 统一编号分配 | 多机心跳报文 日志CSV | 注册表JSON+ 注册日志TXT | 约350行 Python
+tdma_scheduler_ demo.py | 30机TDMA 时隙调度 | 贪心时隙分配, 优先级排队, 延迟统计 | 速率需求JSON 配置文件 | 时隙表CSV+ 延迟箱线图PNG+ 甘特图PNG | 约300行 Python
+airspace_ replan_demo.py | 空域重规划+ 航线搜索 | 栅格搜索, 空域冲突检测, 时序重规划逻辑 | 空域配置JSON+ 动态事件CSV | 新空域JSON+ 新航线CSV+ 动态地图MP4 | 约500行 Python
+[/TABLE]
+from sklearn.cluster import DBSCAN
+from scipy.optimize import linear_sum_assignment
+
+# ------- 步骤1: 地面分割 (Patchwork++简化) -------
+def segment_ground(pts_xyz, grid_size=0.5, thresh=0.2):
+    极坐标栅格地面分割
+    r = np.sqrt(pts_xyz[:,0]**2 + pts_xyz[:,1]**2)
+    az = np.arctan2(pts_xyz[:,1], pts_xyz[:,0])
+    n_r = max(1, int(r.max() / grid_size))
+    n_a = 36
+    gr = np.clip((r / grid_size).astype(int), 0, n_r - 1)
+    ga = np.clip(((az + np.pi) / (2*np.pi) * n_a).astype(int), 0, n_a - 1)
+    ground = np.zeros(len(pts_xyz), dtype=bool)
+    for ri in range(n_r):
+        for ai in range(n_a):
+            idx = np.where((gr == ri) & (ga == ai))[0]
+            if len(idx) < 3: continue
+            z_min = pts_xyz[idx, 2].min()
+            ground[idx] = pts_xyz[idx, 2] < (z_min + thresh)
+    return np.where(ground)[0], np.where(~ground)[0]
+
+# ------- 步骤2: DBSCAN聚类 -------
+def cluster_points(pts, eps=0.5, min_pts=10):
+    labels = DBSCAN(eps=eps, min_samples=min_pts).fit(pts).labels_
+    return [np.where(labels == l)[0] for l in set(labels) if l != -1]
+
+# ------- 步骤3: PCA-OBB拟合 -------
+def fit_obb(points):
+    PCA拟合有向包围盒, 返回(center, size)
+    c = points.mean(axis=0)
+    cov = np.cov((points - c).T)
+    evals, evecs = np.linalg.eigh(cov)
+    size = np.array([(points - c) @ evecs[:,i] for i in range(3)]).ptp(axis=1)
+    return c, size[np.argsort(size)[::-1]]  # 最长轴在前
+
+# ------- 步骤4: 雷达-激光关联 (匈牙利算法) -------
+def associate_radar(radar_xy, obs_centers, max_dist=2.0):
+    nr, no = len(radar_xy), len(obs_centers)
+    cost = np.full((nr, no), 1e9)
+    for i, rp in enumerate(radar_xy):
+        for j, oc in enumerate(obs_centers):
+            d = np.linalg.norm(rp - oc[:2])
+            if d < max_dist: cost[i,j] = d
+    return list(zip(*linear_sum_assignment(cost))))
+
+# ------- 步骤5: 置信度融合 -------
+def fuse_conf(li_conf, ra_conf=0, vi_conf=0, w=(0.5,0.3,0.2)):
+    fused = li_conf * w[0]
+    ws = w[0]
+    if ra_conf > 0: fused += ra_conf * w[1]; ws += w[1]
+    if vi_conf > 0: fused += vi_conf * w[2]; ws += w[2]
+    return min(fused / ws, 1.0)
+
+# ------- 主流程 -------
+def run_fusion(lidar_pts, radar_targets, eps=0.5, min_pts=10):
+    _, ng_idx = segment_ground(lidar_pts[:,:3])
+    ng = lidar_pts[ng_idx][:,:3]
+    clusters = cluster_points(ng, eps, min_pts)
+    obstacles = []
+    for i, cl in enumerate(clusters):
+        if len(cl) < 5: continue
+        c, s = fit_obb(ng[cl])
+        if s.min() < 0.3: continue
+        conf = min(len(cl)/200, 0.95)
+        obstacles.append({'id':i, 'center':c, 'size':s, 'conf':conf, 'vel':np.zeros(3)})
+    # 雷达关联 -> 补充速度
+    if radar_targets:
+        matches = associate_radar(
+            np.array([[rt['x'], rt['y']] for rt in radar_targets]),
+            [obs['center'] for obs in obstacles])
+        for ri, oi in matches:
+            obstacles[oi]['vel'] = radar_targets[ri]['vel_enu']
+    for obs in obstacles:
+        obs['conf'] = fuse_conf(obs['conf'], 0.7)
+    return obstacles
+from collections import defaultdict
+
+def build_4d_grid(trajectories, res=1.0, horizon_s=10.0,
+                  safety_xy=5.0, safety_z=3.0, sigma_grow=0.02):
+    
+    trajectories: {drone_id: [(t_ms, x, y, z, vx, vy, vz, sigma), ...]}
+    返回: grid = {(ix,iy,iz,it): {drone_id, ...}}
+    
+    grid = defaultdict(set)
+    t_step = 100  # ms
+    h_steps = int(horizon_s * 1000 / t_step)
+
+    for did, states in trajectories.items():
+        for si in range(len(states)):
+            end = min(si + h_steps, len(states))
+            for fi in range(si, end):
+                t, x, y, z, vx, vy, vz, sigma = states[fi]
+                dt = (fi - si) * 0.1  # s
+                sigma_t = sigma + sigma_grow * dt  # 不确定性膨胀
+                half_xy = safety_xy/2 + 3*sigma_t
+                half_z  = safety_z/2  + 3*sigma_t
+
+                ix0 = int((x - half_xy) / res)
+                ix1 = int((x + half_xy) / res)
+                iy0 = int((y - half_xy) / res)
+                iy1 = int((y + half_xy) / res)
+                iz0 = int((z - half_z)  / res)
+                iz1 = int((z + half_z)  / res)
+                it  = int(t / t_step)
+
+                for ix in range(ix0, ix1+1):
+                    for iy in range(iy0, iy1+1):
+                        for iz in range(iz0, iz1+1):
+                            grid[(ix, iy, iz, it)].add(did)
+    return grid
+
+def detect_conflicts(grid, drone_ids, safety_xy=5.0, safety_z=3.0):
+    遍历全部机对, 找体素交集 → 冲突判定
+    conflicts = []
+    for i in range(len(drone_ids)):
+        for j in range(i+1, len(drone_ids)):
+            a, b = drone_ids[i], drone_ids[j]
+            vox_a = {k for k,v in grid.items() if a in v}
+            vox_b = {k for k,v in grid.items() if b in v}
+            common = vox_a & vox_b
+            if not common: continue
+
+            # 按时间分组, 找最接近距离
+            time_groups = defaultdict(list)
+            for (ix,iy,iz,it) in common:
+                time_groups[it].append((ix,iy,iz))
+
+            for it, voxels in time_groups.items():
+                # 体素中心距离近似 (两机在同一体素 → 距离<体素对角线)
+                dist_est = 1.73  # √3 for 1m grid
+                sep = min(safety_xy, safety_z)
+                level = 2 if dist_est < sep else 1
+                conflicts.append({
+                    'time_ms': it * 100, 'drone_a': a, 'drone_b': b,
+                    'closest_m': dist_est, 'margin_m': sep, 'level': level
+                })
+    return conflicts
+
+# 使用示例:
+# traj = load_trajectories_csv('traj_30drones.csv')
+# grid = build_4d_grid(traj, res=1.0, horizon_s=10.0)
+# cf = detect_conflicts(grid, sorted(traj.keys()))
+# print(f'Detected {len(cf)} conflicts: '
+#       f'{sum(1 for c in cf if c[level]==2)} confirmed, '
+#       f'{sum(1 for c in cf if c[level]==1)} potential')
+from collections import Counter
+import numpy as np
+
+# ------- 协议模板库 -------
+TEMPLATES = [
+    {'name':'MAVLink_v2', 'headers':[0xFD], 'len_range':(11,279), 'hb_ms':1000},
+    {'name':'DJI_MSDK',   'headers':[0x55,0xAA], 'len_range':(10,150), 'hb_ms':500},
+    {'name':'Private_A',  'headers':[0x7E,0x8B], 'len_range':(16,64),  'hb_ms':2000},
+    {'name':'Private_B',  'headers':[0xA5], 'len_range':(24,128), 'hb_ms':800},
+]
+
+# ------- 特征提取 -------
+def extract_features(messages):
+    messages: [(timestamp_ms, raw_bytes), ...]
+    headers = Counter(msg[1][0] for msg in messages if msg[1])
+    lengths = sorted(len(msg[1]) for msg in messages)
+    intervals = []
+    for i in range(1, len(messages)):
+        dt = messages[i][0] - messages[i-1][0]
+        if 200 < dt < 5000: intervals.append(dt)
+    n = len(lengths)
+    return {
+        'top_headers': headers.most_common(5),
+        'len_min': lengths[0], 'len_max': lengths[-1],
+        'len_median': lengths[n//2],
+        'est_hb_ms': int(np.median(intervals)) if intervals else 1000,
+    }
+
+# ------- 模板匹配 -------
+def match_template(feat):
+    best_name, best_score = 'Unknown', 0.0
+    for tmpl in TEMPLATES:
+        score = 0.0
+        if any(h in dict(feat['top_headers']) for h in tmpl['headers']):
+            score += 0.4
+        if tmpl['len_range'][0] <= feat['len_median'] <= tmpl['len_range'][1]:
+            score += 0.3
+        if feat['est_hb_ms'] > 0:
+            err = abs(feat['est_hb_ms'] - tmpl['hb_ms']) / tmpl['hb_ms']
+            if err < 0.2:   score += 0.2
+            elif err < 0.5: score += 0.1
+        if score > best_score:
+            best_score, best_name = score, tmpl['name']
+    return best_name, min(best_score, 0.95) if best_score >= 0.5 else ('Unknown', best_score)
+
+# ------- 注册状态机 -------
+class RegistryStateMachine:
+    STATES = ['DISCOVERED','IDENTIFYING','CAP_REQ','CAP_RECV','REGISTERED','FAILED']
+    def __init__(self, protocol, confidence):
+        self.state = 'DISCOVERED'
+        self.protocol = protocol
+        self.confidence = confidence
+        self.capability = {}
+        self.retries = 0
+        self.log = []
+
+    def step(self, new_state, detail=''):
+        self.log.append(f'[{self.state}] → [{new_state}] {detail}')
+        self.state = new_state
+
+    def run(self, allocator, drone_type=3):
+        self.step('IDENTIFYING', f'proto={self.protocol} conf={self.confidence:.0%}')
+        if self.protocol == 'Unknown':
+            self.step('FAILED', 'unknown protocol'); return None
+        self.step('CAP_REQ')
+        # 模拟能力查询 (实际通过通信链路上报)
+        self.capability = {
+            'max_speed': 15, 'max_altitude': 500, 'max_endurance_s': 1800,
+            'has_lidar': 1, 'supports_vel_ctrl': 1, 'supports_mission': 1
+        }
+        self.step('CAP_RECV', f'{len(self.capability)} fields')
+        num_id = allocator.allocate(drone_type)
+        self.step('REGISTERED', f'id={num_id}')
+        return num_id
+
+# ------- 编号分配器 -------
+class IDAllocator:
+    PREFIX = {0:'R', 1:'D', 2:'L', 3:'U'}
+    def __init__(self): self._cnt = {k:0 for k in self.PREFIX}
+    def allocate(self, dtype=3):
+        self._cnt[dtype] += 1
+        return f'UAV_{self.PREFIX[dtype]}{self._cnt[dtype]:02d}'
+
+# 使用示例:
+# msgs = load_heartbeat_csv('drone_heartbeats.csv')
+# feat = extract_features(msgs)
+# proto, conf = match_template(feat)
+# alloc = IDAllocator()
+# sm = RegistryStateMachine(proto, conf)
+# rid = sm.run(alloc, drone_type=0)
+# print(f'Registered: {rid}, protocol={proto}, confidence={conf:.0%}')
+import matplotlib.pyplot as plt
+
+TDMA_SLOTS = 36        # 每帧时隙数
+TDMA_FRAME_MS = 30     # 帧周期
+SLOT_KBPS = 5.6        # 单时隙容量 (kbps, GFSK 200kbps, 833us)
+
+def greedy_allocate(demands):
+    
+    demands: [{'id':nid, 'dir':'UL'/'DL', 'rate_kbps':r, 'priority':p}, ...]
+    返回: slot_table = [{'node':nid, 'dir':d, 'pri':p}, ...] × 36
+    
+    queue = sorted(demands, key=lambda d: (d['priority'], -d['rate_kbps']))
+    slots = [None] * TDMA_SLOTS
+    slots[0] = slots[-1] = {'node': -1, 'dir': 'GUARD', 'pri': 0}  # 保护时隙
+
+    alloc_cnt = defaultdict(int)
+    for dm in queue:
+        needed = max(1, int(np.ceil(dm['rate_kbps'] / SLOT_KBPS)))
+        for s in range(1, TDMA_SLOTS - 1):
+            if alloc_cnt[dm['id']] >= needed: break
+            if slots[s] is None:
+                slots[s] = {'node': dm['id'], 'dir': dm['dir'], 'pri': dm['priority']}
+                alloc_cnt[dm['id']] += 1
+    return slots
+
+def estimate_delays(slot_table, node_demands):
+    估算每节点的平均/最大时隙等待延迟 (ms)
+    delays = {}
+    for dm in node_demands:
+        nid = dm['id']
+        # 找到该节点的时隙位置
+        positions = [i for i, s in enumerate(slot_table) if s and s['node'] == nid]
+        if not positions: continue
+        # 时隙间隙 → 等待时间 (帧内均匀分布假设)
+        gaps = np.diff(positions)
+        avg_gap = np.mean(gaps) if len(gaps) > 0 else TDMA_SLOTS
+        delays[nid] = {
+            'avg_ms': avg_gap * TDMA_FRAME_MS / TDMA_SLOTS / 2,  # 期望等待=间隙/2
+            'max_ms': max(gaps) * TDMA_FRAME_MS / TDMA_SLOTS if len(gaps) > 0 else TDMA_FRAME_MS
+        }
+    return delays
+
+def plot_gantt(slot_table, output='tdma_gantt.png'):
+    绘制TDMA帧甘特图
+    fig, ax = plt.subplots(figsize=(14, 4))
+    colors = {None: 'lightgray', 'GUARD': 'darkgray',
+              'UL': '#4CAF50', 'DL': '#2196F3'}
+    for i, s in enumerate(slot_table):
+        if s is None:
+            c, label = 'lightgray', ''
+        elif s['dir'] == 'GUARD':
+            c, label = 'darkgray', 'G'
+        else:
+            c = colors[s['dir']]
+            label = fN{s['node']}
+        ax.barh(0, 1, left=i, color=c, edge='white', linewidth=0.5)
+        if label: ax.text(i+0.5, 0, label, ha='center', va='center', fontsize=6)
+    ax.set_xlim(0, TDMA_SLOTS)
+    ax.set_xlabel('Slot index'); ax.set_title('TDMA Frame Slot Allocation (Gantt)')
+    plt.tight_layout(); plt.savefig(output, dpi=150); plt.close()
+
+# 使用示例:
+# demands = [{'id':0, 'dir':'DL', 'rate_kbps':20, 'priority':0}]  # 基站下行
+# for i in range(1, 31):  # 30架无人机上行
+#     demands.append({'id':i, 'dir':'UL', 'rate_kbps':1.0, 'priority':1})
+# slots = greedy_allocate(demands)
+# delays = estimate_delays(slots, demands)
+# plot_gantt(slots, 'tdma_gantt.png')
+import heapq
+from matplotlib.patches import Polygon
+
+# ------- 栅格路径搜索 -------
+def astar_grid(start, goal, grid_2d, allow_diag=True):
+    
+    2D栅格搜索。
+    grid_2d: 0=自由, 1=障碍
+    start/goal: (row, col) 栅格索引
+    返回: [(row,col), ...] 路径点列表 或 None (无解)
+    
+    rows, cols = grid_2d.shape
+    neighbors = [(0,1),(0,-1),(1,0),(-1,0)]
+    if allow_diag:
+        neighbors += [(1,1),(1,-1),(-1,1),(-1,-1)]
+
+    def h(a, b): return np.sqrt((a[0]-b[0])**2 + (a[1]-b[1])**2)  # 欧氏距离启发式
+
+    open_set = [(h(start, goal), 0, start)]
+    came_from = {}
+    g_score = {start: 0}
+
+    while open_set:
+        _, _, current = heapq.heappop(open_set)
+        if current == goal:
+            # 回溯路径
+            path = [current]
+            while current in came_from:
+                current = came_from[current]
+                path.append(current)
+            return path[::-1]
+
+        for dr, dc in neighbors:
+            nr, nc = current[0]+dr, current[1]+dc
+            if not (0 <= nr < rows and 0 <= nc < cols): continue
+            if grid_2d[nr, nc] == 1: continue  # 障碍
+            move_cost = np.sqrt(dr**2 + dc**2)
+            tent_g = g_score[current] + move_cost
+            if tent_g < g_score.get((nr, nc), float('inf')):
+                came_from[(nr, nc)] = current
+                g_score[(nr, nc)] = tent_g
+                f = tent_g + h((nr, nc), goal)
+                heapq.heappush(open_set, (f, id((nr, nc)), (nr, nc)))
+    return None  # 无可行路径
+
+# ------- 空域冲突检测 -------
+def check_airspace_conflict(new_zone, existing_zones):
+    
+    new_zone: {'type':'no_fly'/'corridor'/'return', 'polygon':[(x,y),...]}
+    existing_zones: 已有的空域列表
+    返回: 冲突的空域列表
+    
+    from shapely.geometry import Polygon as SPoly
+    new_poly = SPoly(new_zone['polygon'])
+    conflicts = []
+    for ez in existing_zones:
+        if new_poly.intersects(SPoly(ez['polygon'])):
+            conflicts.append(ez)
+    return conflicts
+
+# ------- 航线重规划主流程 -------
+def replan_routes(drones, airspace_changes, grid_res=1.0, bounds=(1000,1000)):
+    
+    drones: {drone_id: {'plan':[(x,y),...], 'pos':(x,y)}}
+    airspace_changes: 空域变更事件序列
+    返回: 每架受影响无人机的重规划航线
+    
+    # 构建障碍栅格 (禁飞区=1, 自由=0)
+    w, h = int(bounds[0]/grid_res), int(bounds[1]/grid_res)
+    grid = np.zeros((h, w), dtype=np.uint8)
+
+    for change in airspace_changes:
+        if change['type'] == 'no_fly_add':
+            # 将禁飞区多边形栅格化
+            poly = np.array(change['polygon']) / grid_res
+            # ... 栅格化填充 (省略具体实现)
+            pass
+
+    results = {}
+    for did, drone in drones.items():
+        # 检查原航线是否穿越禁飞区
+        needs_replan = False
+        for wp in drone['plan']:
+            r, c = int(wp[1]/grid_res), int(wp[0]/grid_res)
+            if 0 <= r < h and 0 <= c < w and grid[r, c] == 1:
+                needs_replan = True; break
+
+        if not needs_replan: continue
+
+        start = (int(drone['pos'][1]/grid_res), int(drone['pos'][0]/grid_res))
+        goal  = (int(drone['plan'][-1][1]/grid_res), int(drone['plan'][-1][0]/grid_res))
+        new_path = astar_grid(start, goal, grid)
+        if new_path:
+            results[did] = [(c*grid_res, r*grid_res) for (r,c) in new_path]
+        else:
+            results[did] = None  # 无可行路径 → 需要人工干预
+    return results
+
+# ------- 动态序列可视化 -------
+def render_airspace_sequence(drones, zones, replan_results, output_dir):
+    逐帧渲染空域重规划过程, 合成为MP4
+    import matplotlib.pyplot as plt
+    for frame_i, (did, new_path) in enumerate(replan_results.items()):
+        fig, ax = plt.subplots(figsize=(10, 8))
+        # 绘制禁飞区 (红色半透明填充)
+        for z in zones:
+            if z['type'] == 'no_fly':
+                ax.add_patch(Polygon(z['polygon'], color='red', alpha=0.2))
+        # 绘制原航线 (灰色虚线) 和新航线 (蓝色实线)
+        orig = drones[did]['plan']
+        ax.plot([p[0] for p in orig], [p[1] for p in orig], '--', c='gray', lw=1)
+        if new_path:
+            ax.plot([p[0] for p in new_path], [p[1] for p in new_path], '-', c='blue', lw=2)
+        ax.set_aspect('equal'); ax.grid(True, alpha=0.3)
+        plt.savefig(f'{output_dir}/frame_{frame_i:04d}.png', dpi=150)
+        plt.close()
+    # 使用 ffmpeg 合成: ffmpeg -framerate 2 -i frame_%04d.png -c:v libx264 output.mp4
+# 操作系统: Ubuntu 22.04 LTS (或 Windows 10+ WSL2)
+# Python: 3.9+
+# 依赖安装:
+pip install numpy scipy matplotlib open3d pandas scikit-learn
+
+# ===== 2. 获取输入数据 =====
+# 输入数据为预录制的传感器数据包 (sensor_bag_001.zip → 解压至 ./data/)
+# 内容: lidar_frame_0001.npz (点云XYZI), radar_targets.csv (毫米波目标),
+#       rgb_frame_0001.jpg (RGB图像)
+# 这些数据来自第11章的仿真环境或实机采集
+
+# ===== 3. 运行 =====
+python obstacle_fusion_demo.py \
+    --lidar ./data/lidar_frame_0001.npz \
+    --radar ./data/radar_targets.csv \
+    --image ./data/rgb_frame_0001.jpg \
+    --output_dir ./output/ \
+    --dbscan_eps 0.5 \
+    --dbscan_minpts 10 \
+    --ground_thresh 0.2
+
+# ===== 4. 控制台输出示例 =====
+# [INFO] Loading LiDAR point cloud: 124832 points
+# [INFO] Ground segmentation (Patchwork++): ground=89234, nonground=35598
+# [INFO] DBSCAN clustering: 12 clusters found
+# [INFO] OBB fitting: 8 valid obstacles (min_size>0.3m)
+# [INFO] Radar fusion: 3 radar targets matched to LiDAR clusters
+# [INFO] Camera fusion: 2 visual detections used for classification
+# [INFO] Output: 8 obstacles → ./output/obstacles.csv
+# [INFO] Visualization: ./output/obstacles_view.png
+# [INFO] Elapsed: 0.847s
+
+# ===== 5. 输出文件 =====
+# ./output/obstacles.csv:
+# id,center_x,center_y,center_z,size_x,size_y,size_z,class,confidence
+# 1,12.45,-3.21,2.10,1.20,0.80,3.50,building,0.95
+# 2,15.30,1.80,0.50,0.60,0.50,1.20,vehicle,0.88
+# ...
+# ./output/obstacles_view.png: 点云 + OBB框 + 类别标签 的可视化图像
+cd ~/uav_safety_ws/
+colcon build --packages-select uav_conflict_detection
+
+# ===== 2. 启动 (终端1) =====
+ros2 launch uav_conflict_detection conflict_detection.launch.py
+
+# ===== 3. 加载测试轨迹 (终端2) =====
+ros2 run uav_conflict_detection load_trajectories.py \
+    --input ./test_data/traj_30drones_300s.csv
+
+# ===== 4. 查看冲突检测输出 (终端3) =====
+ros2 topic echo /conflict/events
+# 输出示例:
+# header:
+#   stamp:
+#     sec: 15
+#     nanosec: 300000000
+# conflict_time_ms: 15300
+# drone_a_id: 5
+# drone_b_id: 18
+# closest_distance_m: 3.2
+# separation_margin_m: 5.0
+# conflict_level: 1  # 潜在冲突 (间距<安全间隔)
+# ---
+# ...
+
+# ===== 5. 录制测试数据 (用于后续回放和回归测试) =====
+ros2 bag record -o conflict_test_output /conflict/events /drone/state /grid/occupancy
+阶段 | 时间 | 主要工作 | 产出物 | 验收标准
+一 | 第1-2周 | 数据模型定稿, TDMA/COFDM模拟器编码 | 5个.msg/.idl文件, TDMA+COFDM模拟器源码 +单元测试 | 数据模型通过技术评审, 模拟器输出与手算一致
+二 | 第3-4周 | 通信三链路联调, 4D栅格+冲突检测编码 | 链路联调测试报告, 冲突检测源码+测试 | 端到端延迟-丢包与设计值 一致, 冲突检测与Python 原型交叉验证通过
+三 | 第5-6周 | MAVLink适配器, 协议指纹引擎, 5个Python算法原型 | C++适配器+指纹引擎源码, Python原型×5+ README+测试数据 | MAVLink↔标准消息映射 100%正确, 跨模块联调 端到端数据流贯通
+四 | 第7-8周 | 集成联调+bug修复, 文档编写, 交付准备 | 全部源码(Git仓库), README×8, 代码开发总结报告 | 全部演示场景可运行, 文档和代码包完整
+[/TABLE]
+    原型代码中涉及的各类参数：安全间隔阈值、DBSCAN的ε值、4D栅格分辨率、消解成本函数的权重，目前以硬编码常量或命令行参数的形式散落在代码各处。这在原型阶段尚可接受，但进入工程化阶段后，这种做法的代价会迅速显现。正式版本需要将上述参数统一迁移至配置文件系统，以YAML或JSON格式存储，并交由ROS 2的parameter server统一管理，从而支持运行时动态更新而无需重启节点，这一点在多无人机协同场景下尤为重要，参数调整的代价不能由重启来承担。
+     日志与指标的问题，性质类似，但往往被低估。printf和cout式的文本日志在调试单模块时勉强够用，一旦涉及跨节点的事后追溯，几乎没有价值。工程化阶段每个模块需要引入结构化日志，使用rclcpp logging或spdlog库，输出包含时间戳、节点名、日志级别、消息内容及关键变量值的JSON格式日志，以便通过ELK等平台进行集中查询。与此同时，各模块的运行时内部状态需要以可订阅的形式暴露出来：冲突检测的耗时与机对处理数、4D栅格的体素数量与内存占用、通信链路各QoS队列的堆积长度，这些指标通过diagnostic_msgs或Prometheus exporter发布为topic或HTTP endpoint，使态势中心或独立监控面板能够实时感知系统状态。
+验证层级 | 环境/工具 | 参与组件 | 回答的问题 | 典型周期 | 在本报告中的章节
+轻量算法仿真 | Python + numpy/scipy + C++ 原型代码 | 单个算法的独立 输入/输出验证 | 算法本身对不对? | 每个算法 1-3人天 | 第11.2节
+开源 半实物仿真 | PX4/ArduPilot SITL + Gazebo/AirSim + ROS 2 + 可选SDR | 多个模块在飞控 闭环中的联合运行 | 算法在飞控闭环中 能不能正常工作? | 每轮场景 1-5人天 | 第11.3节
+外场实测验证 | 2-5架真实无人机 + 地面平台 + 测量设备 | 完整系统在真实 物理环境中的运行 | 系统在真实世界中 达不达标? | 分阶段 共8-12周 | 第12章
+[/TABLE]
+场景编号 | 场景名称 | 核心压力点 | 无人机数量 | 仿真时长 | 关键指标
+1 | 空旷搜索 | 冲突检测召回率/ 误报率 | 30架 | 300s | 检出率≥95% 误报率≤10%
+2 | 障碍物密集穿越 | 感知融合精度/ OBB拟合误差 | 10架 | 200s | OBB中心误差<0.5m 尺寸误差<0.3m
+3 | 窄通道会车 | 消解方案可行性/ 安全间距保持 | 2-4架 | 120s | 消解成功≥90% 最近距离>安全间隔
+4 | 动态障碍避让 | 不确定性传播/ 安全预警提前量 | 10架 +1动障 | 180s | 预警提前≥3s 误报率≤20%
+5 | 通信受限协同 | 路由收敛时间/ 降级策略安全性 | 15架 | 240s | 路由收敛<5s 掉线容忍≥3s
+6 | 目标点临时变化 | 任务重规划耗时/ 资源冲突消解 | 20架 | 200s | 重规划<100ms 冲突消解成功≥95%
+[/TABLE]
+序号 | 指标 | 考核类别 | 对应测试项目 | 判定准则
+1 | 静态障碍物识别 精度≤0.5m | 基础功能性 | 12.2.1 静态障碍物 识别精度测试 | ≥95%的障碍物中心 定位误差≤0.5m
+2 | 动态目标追踪 误差≤0.3m | 基础功能性 | 12.2.2 动态目标 追踪误差测试 | ≥90%的时间帧内 追踪误差≤0.3m
+3 | 避障响应时间 ≤0.1s | 基础功能性 | 12.2.3 避障响应 时间测试 | 从感知到执行机构 动作≤100ms
+4 | 空地指令延迟 ≤50ms | 基础功能性 | 12.2.5 10km通信 延迟测试 | 10km距离下≥99% 数据包RTT≤50ms
+5 | 空域动态划分 响应≤10s | 基础功能性 | 12.2.7 空域动态 划分响应测试 | 从操作完成到全部 30机轨迹修正≤10s
+6 | 异构无人机 快速注册 | 基础功能性 | (第7章方法) | 单机注册≤30s (含协议识别)
+7 | 避障连续无故障 ≥300h | 极端环境 可靠性 | 12.2.4 300h避障 可靠性测试 | 300h内无系统崩溃、 无漏报导致碰撞
+8 | 通导监连续 工作≥120h | 极端环境 可靠性 | 12.2.8 120h连续 运行测试 | 120h内通信/态势/ 数据记录不中断
+9 | 三断+低能见度 +高低温+强磁 | 极端环境 可靠性 | 12.2.9 高低温与 强磁环境测试 | -20℃冷启动+60℃运行 +>10A/m磁场航向 误差<5°
+10 | 30机协同+99.9% +30min+30kg | 大规模协同 效能 | 12.2.6 30机无碰撞 调度测试 | 100h飞行冲突消解 成功率≥99.9%, 部署≤30min,≤30kg
+[/TABLE]
+阶段 | 时间 | 核心任务 | 关键输出 | 里程碑
+第一阶段 底层构建与 协议开发 | 第1-4个月 | 总体方案、接口规范、 算法原型、测试方案、 鸿蒙适配论证 | 原型代码库+测试数据集 +接口规范文档 +鸿蒙适配报告 | M1: 总体方案评审 (M2前完成接口冻结)
+第二阶段 单机避障与 样机研制 | 第5-8个月 | 单机感知避障闭环、 便携平台初样、 网关联调、通信联调 | 单机样机+平台初样 +网关联调报告 +通信延迟测试报告 | M2: 单机避障原型完成 M3: 便携平台初样完成
+第三阶段 集群联调与 指标攻坚 | 第9-14个月 | 5机→15机→30机 逐级扩编联调、 十项指标逐项攻坚 | 30机协同联调报告 +指标测试数据 +压力测试报告 | M4: 10km通信测试完成 M5: 30机协同演示完成 (第14月末前)
+第四阶段 综合演练与 验收结题 | 第15-18个月 | 综合救援演习、 第三方检测、 验收材料整理 | 实战演习视频 +第三方检测报告(10份) +用户手册+研制总结 | M6: 第三方指标检测完成 (第17月末前)
+[/TABLE]
+里程碑 | 时间节点 | 通过准则 | 评审方式
+M1 总体方案评审 | 第4个月末 | 1) 全部子系统设计方案通过内部评审 2) 接口规范冻结（五个数据模型    和序列化格式的正式发布版本） 3) 算法原型代码通过仿真测试    数据集的验证（核心算法正确性    达到测试数据集定义的阈值） | 内部评审会 （总体组+各专 业组组长+外部 专家顾问）
+M2 单机避障 原型完成 | 第8个月末 | 1) 单机避障闭环在真实无人机上    验证通过（≥10次飞行测试） 2) 静态障碍物识别和动态追踪的    单机测试数据达到或接近指标    （允许有≤20%的偏差-在    第三阶段中通过多机场景优化补足） | 内部评审 （总体组+ 感知避障组+ 测试验证组）
+M3 便携平台 初样完成 | 第8个月末 | 1) 平台重量实测≤30kg 2) 部署时间实测≤30min 3) 态势显示、空域编辑、通信管理、    数据记录四项核心功能可用 | 内部评审 （总体组+ 地面平台组）
+M4 10km通信 测试完成 | 第12个月末 | 1) 10km距离下端到端延迟≤50ms    （≥99%包） 2) 丢包率≤0.1% 3) 30机并发通信无系统性碰撞 | 内部评审 （总体组+ 通信组）
+M5 30机协同 演示完成 | 第14个月末 | 1) 30机（≥20架实机+≤10架SITL）    累计飞行≥50h 2) 冲突消解成功率≥99.9%（暂定-    100h全量数据在M6前完成） 3) 空域划分响应≤10s | 内部评审 （总体组+协同 调度组+测试 验证组）
+M6 第三方指标 检测完成 | 第17个月末 | 1) 十项指标全部通过第三方    独立测量 2) 10份CMA/CNAS检测报告出具 3) 若某项未达标-在第17个月内    完成改进和补测 | 外部评审 （第三方检测 机构独立测量 +专家验收会）
+[/TABLE]
+风险编号 | 风险描述 | 影响 | 概率 | 等级 | 首要应对措施
+T1 | 0.1s避障响应时间 实现超预算 | 高 | 中 | 高 | 算法优化+并行流水线+高响应ESC +FPGA卸载备选
+T2 | 低能见度下感知 精度退化至不可用 | 中 | 中 | 中 | 雷达主导融合+自动降速 +SWIR备选
+T3 | 强磁+无GNSS下 航向漂移 | 中 | 低 | 低 | 备用光纤陀螺IMU+VIO备选 +航线规避策略
+E1 | 平台重量超30kg | 中 | 中 | 中 | 能源外置不计入+碳纤维箱体 +SDR SoC集成
+E2 | 120h能源接续 瞬时断电 | 中 | 中 | 中 | 超级电容桥接+双电源冗余 +提前预警机制
+V1 | 30机实飞组织 审批/安全/天气 | 高 | 中 | 高 | 20实机+10 SITL混合 +多层次安全终止方案
+V2 | 10km通视测试 场地难觅 | 中 | 中 | 中 | 提前选址踏勘+链路预算外推 +升高天线补偿
+V3 | 高低温/EMC 测试排期长 | 中 | 中 | 中 | 第12个月启动预约 +2-3家备选机构
+S1 | 长交期器件 延迟到货 | 中 | 中 | 中 | 提前采购+备件储备 +M1前启动下单
+S2 | 外场审批进度 超出预期 | 中 | 中 | 中 | M1后成立专职协调组 +行政通道加速
+S3 | 多单位协同 沟通延迟 | 低 | 中 | 低 | 月度协调会+季度书面报告
+[/TABLE]
+指标 | 申报书目标 | 已有基础水平 | 差距分析 | 闭合途径
+静态障碍物 识别精度 | ≤0.5m | 仿真: 0.3-0.4m (半实物仿真 Gazebo) | 仿真→真实传感器 噪声引入0.1-0.2m 误差增加- 实测可能在0.4-0.6m | 传感器标定优化+ ESKF状态估计 补偿定位误差
+动态目标 追踪误差 | ≤0.3m | 仿真: 0.15-0.25m (匀速目标) 机动目标0.25-0.35m | 机动目标(>5m/s² 加速度)的追踪 误差略超目标- 需提升运动模型阶数 | 9状态Kalman(加加速度) 或IMM多模型 提升机动适应性
+避障响应 时间 | ≤0.1s | 仿真: 各段之和 80-120ms (未经深度优化) | 接近边界- 最坏情况可能 超出20ms- 鲁棒性不足 | 流水线并行+ INT8模型量化+ 高响应ESC (14.1.1节应对措施)
+30机协同 调度 | ≥30架 | 仿真: 30机 4D栅格构建 50-80ms/帧 | 实飞引入通信延迟 抖动和定位误差 →冲突检测精度 略降 | SITL注入补充实机 +20实机+10SITL 混合测试验证
+10km通信 链路 | ≥10km | 链路预算计算: 余量6dB (1.4GHz TDMA) | 计算假设自由空间 -实际地面反射 和多径可能额外 衰减3-5dB | 外场测试验证+ 若余量不足则 提升天线增益 至5-6dBi
+50ms端到端 延迟 | ≤50ms | MAC层: <25ms (NS-3仿真) 传播: 33μs/10km | 仿真未包含 应用层组帧/解帧 和ROS 2序列化 开销-实测可能 30-40ms | 实测验证+若超 标则减少应用层 组帧padding至 最小MTU
+99.9%无碰撞 调度 | ≥99.9% | 仿真: 99.95% (30机×100h 离线仿真) | 仿真→实飞迁移 因风扰动、通信 延迟抖动可能 降低0.05-0.1% | 100h实飞+SITL 混合测试积累 统计数据- 若不足则优化 消解器参数
+120h连续 运行 | ≥120h | 此前外场累计 ~50h (非连续) 单次最长~8h | 从未进行过 120h连续运行 测试-系统 长期稳定性 未经考验 | 第12.2.8节测试 -若出现故障 修复后重新计时 直至通过
+30kg平台 重量 | ≤30kg | 此前原型：12kg (不含通信基站 和能源) | 通信基站+第二显 示器+天线系统 增重约10-15kg →总重22-27kg | 碳纤维箱体+ SDR集成- 目标25-28kg (不含外部电池)
+30min部署 时间 | ≤30min | 此前外场经验: 20-35min (含临时故障 排除和调试) | 无故障条件下 约20min- 带30架无人机 准备更久 | 预连接线缆+ 操作流程优化+ 团队分工协作 →目标20-25min
+[/TABLE]
+序号 | 交付物名称 | 交付形式 | 交付时间 | 验收方式
+1 | 技术咨询报告 (含7项内容) | PDF电子版 +可编辑Word版 | 申报书签订后 1个月内 | 甲方审查+ 会议沟通确认
+2 | 通信初步方案 (三链路架构) | PDF设计文档 (本报告第5章) | 申报书签订后 2个月内 | 甲方审查确认 方案完整性
+3 | 集中协同运动控制 框架方案与实施步骤 | PDF设计文档 (本报告第6章 +第13章) | 申报书签订后 2个月内 | 甲方审查确认 方案可行性
+4 | 部分代码与 源代码清单 | Git仓库镜像 或ZIP压缩包 | 申报书签订后 2个月内 | 甲方技术评估 代码编译运行
+5 | 用户手册和 使用说明 | PDF电子版 +印刷版 | 第18个月 | 甲方使用人员 操作验证
+6 | 承诺书和 证明材料 | 用印纸质版 +电子版 | 按政府申报 时间节点 | 甲方签收确认
+7 | 申报材料配合 | 电子版 (按模板填写) | 按政府申报 时间节点 | 甲方审核确认 材料完整合规
+8 | 模拟实战演习 视频 | MP4高清视频 (10-15min) | 第18个月 | 验收评审会 播放评审
+9 | 30机群航迹 分析报告 | PDF报告 +CSV原始数据 | 第18个月 | 验收评审会 数据和统计审查
+10 | 分布式消解 统计数据 | PDF报告 +CSV原始数据 | 第18个月 | 验收评审会 消解成功率验证
+11 | 十项指标第三方 检测报告(10份) | PDF检测报告 (CMA/CNAS签章) | 第17个月 | 验收评审会 检测报告原件 现场核验
+12 | 详细设计报告 | PDF电子版 +可编辑Word版 | 第4个月 (初版) 第18个月 (终版) | 甲方和评审 专家组审查
+[/TABLE]
